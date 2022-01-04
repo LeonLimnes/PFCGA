@@ -1,6 +1,4 @@
 #include "NPC.h"
-#include "Headers/Model.h"
-#include "Headers/Terrain.h"
 extern void addOrUpdateColliders(std::map<std::string,
 	std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders,
 	std::string name, AbstractModel::OBB collider, glm::mat4 transform);

@@ -1,6 +1,5 @@
 #pragma once
 #include "Headers/Model.h"
-#include "Headers/FirstPersonCamera.h"
 #include "Headers/Terrain.h"
 
 class NPC {

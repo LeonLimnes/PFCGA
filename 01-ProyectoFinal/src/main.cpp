@@ -54,6 +54,7 @@
 
 // Archivos de cabecera adicionales
 #include "../../01-ProyectoFinal/NPC.h"
+#include "../../01-ProyectoFinal/Jugador.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -92,7 +93,6 @@ Box boxLightViewBox;
 ShadowBox *shadowBox;
 
 // Models complex instances
-//Model modelRock;
 Model modelAircraft;
 //Casas
 Model modelCasa;
@@ -112,9 +112,9 @@ Model modelGrass;
 Model modelFountain;
 
 // Modelos animados
-Model mayowModelAnimate;		// Mayow
-Model bartmanModelAnimate;		//Bart
-Model modelHazmat;				//Hazmat
+Model bartmanModelAnimate;		// Bart
+Model modelHazmat;				// Hazmat
+Jugador jugador;				// Mayow
 NPC bobAnimate;					// Bob
 
 // Terrain model instance
@@ -154,12 +154,9 @@ glm::mat4 modelMatrixCasa4 = glm::mat4(1.0);
 glm::mat4 modelMatrixCasa5 = glm::mat4(1.0);
 glm::mat4 modelMatrixCasa6 = glm::mat4(1.0);
 
-glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);	// Fuente de agua
 glm::mat4 modelMatrixBartman = glm::mat4(1.0f);		// Bart (jugador)
 glm::mat4 modelMatrixHazmat = glm::mat4(1.0f);		// hazmat
-
-int animationIndex = 1;		// Animación para el jugador
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-53.51, 0, -20.70), glm::vec3(-22.26, 0, -2.73), 
@@ -201,12 +198,6 @@ std::map<std::string, glm::vec3> blendingUnsorted = {
 
 double deltaTime;
 double currTime, lastTime;
-
-// Jump variables
-bool isJump = false;
-float GRAVITY = 1.81;
-double tmv = 0;
-double startTimeJump = 0;
 
 // Definition for the particle system
 GLuint initVel, startTime;
@@ -580,8 +571,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	#pragma region Inicializacion de Mayow
 	//Mayow
-	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
-	mayowModelAnimate.setShader(&shaderMulLighting);
+	jugador.cargarModelo("../models/mayow/personaje2.fbx", &shaderMulLighting);
 	#pragma endregion
 	
 	#pragma region Inicializacion NPCs
@@ -1185,11 +1175,11 @@ void destroy() {
 	modelGrass.destroy();
 	modelFountain.destroy();
 	
-	bartmanModelAnimate.destroy();	//bartman
-	modelHazmat.destroy();			//hazmat
+	bartmanModelAnimate.destroy();	// bartman
+	modelHazmat.destroy();			// hazmat
 
 	// Custom objects animate
-	mayowModelAnimate.destroy();
+	jugador.destroy();				// Mayow
 	bobAnimate.destroy();
 
 	// Textures Delete
@@ -1288,25 +1278,13 @@ bool processInput(bool continueApplication) {
 
 	#pragma region Movimientos de Mayow
 	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(1.0f), glm::vec3(0, 1, 0));
-		animationIndex = 0;
+		jugador.girar(1.0f);
 	}else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-1.0f), glm::vec3(0, 1, 0));
-		animationIndex = 0;
+		jugador.girar(-1.0f);
 	}if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, 0.2));
-		animationIndex = 0;
+		jugador.mover(0.2f);
 	}else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(0, 0, -0.2));
-		animationIndex = 0;
-	}
-
-	bool keySpaceStatus = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-	if(!isJump && keySpaceStatus){
-		isJump = true;
-		startTimeJump = currTime;
-		tmv = 0;
-		sourcesPlay[3] = true;
+		jugador.mover(-0.2f);
 	}
 	#pragma endregion
 
@@ -1344,8 +1322,7 @@ void applicationLoop() {
 	modelMatrixCasa6 = glm::scale(modelMatrixCasa6, glm::vec3(0.1f, 0.1f, 0.1f));
 
 	// Mayow
-	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -9.0f));
-	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+	jugador.start("mayow", glm::vec3(13.0f, 0.05f, -9.0f), -90.0f);
 
 	// Fuente de agua
 	modelMatrixFountain = glm::translate(modelMatrixFountain, glm::vec3(-0.6, 0.0, -4.5));
@@ -1396,9 +1373,9 @@ void applicationLoop() {
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) screenWidth / (float) screenHeight, 0.1f, 100.0f);
 
 		#pragma region Camara Tercera Persona
-		axis = glm::axis(glm::quat_cast(modelMatrixMayow));
-		angleTarget = glm::angle(glm::quat_cast(modelMatrixMayow));
-		target = modelMatrixMayow[3];
+		axis = glm::axis(glm::quat_cast(jugador.modelMatrixJugador));
+		angleTarget = glm::angle(glm::quat_cast(jugador.modelMatrixJugador));
+		target = jugador.modelMatrixJugador[3];
 
 		if(std::isnan(angleTarget))
 			angleTarget = 0.0;
@@ -1705,16 +1682,7 @@ void applicationLoop() {
 
 		#pragma region Colisionador Mayow
 		// Collider de mayow
-		AbstractModel::OBB mayowCollider;
-		glm::mat4 modelmatrixColliderMayow = glm::mat4(modelMatrixMayow);
-		modelmatrixColliderMayow = glm::rotate(modelmatrixColliderMayow, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-		// Set the orientation of collider before doing the scale
-		mayowCollider.u = glm::quat_cast(modelmatrixColliderMayow);
-		modelmatrixColliderMayow = glm::scale(modelmatrixColliderMayow, glm::vec3(0.021, 0.021, 0.021));
-		modelmatrixColliderMayow = glm::translate(modelmatrixColliderMayow, glm::vec3(mayowModelAnimate.getObb().c.x, mayowModelAnimate.getObb().c.y, mayowModelAnimate.getObb().c.z));
-		mayowCollider.e = mayowModelAnimate.getObb().e * glm::vec3(0.021, 0.021, 0.021) * glm::vec3(0.787401574, 0.787401574, 0.787401574);
-		mayowCollider.c = glm::vec3(modelmatrixColliderMayow[3]);
-		addOrUpdateColliders(collidersOBB, "mayow", mayowCollider, modelMatrixMayow);
+		jugador.crearColisionador(collidersOBB);
 		#pragma endregion
 
 		/*******************************************
@@ -1799,15 +1767,15 @@ void applicationLoop() {
 				if (!colIt->second)
 					addOrUpdateColliders(collidersOBB, jt->first);
 				else {
-					if (jt->first.compare("mayow") == 0)
-						modelMatrixMayow = std::get<1>(jt->second);
+					if (jt->first.compare(jugador.nombre) == 0)
+						jugador.modelMatrixJugador = std::get<1>(jt->second);
 				}
 			}
 		}
 		#pragma endregion
 
 		// Constantes de animaciones
-		animationIndex = 1;
+		jugador.indiceAnimacion = 1;
 
 		glfwSwapBuffers(window);
 
@@ -1821,13 +1789,13 @@ void applicationLoop() {
 		alSourcefv(source[0], AL_POSITION, source0Pos);
 
 		// Listener for the Thris person camera
-		listenerPos[0] = modelMatrixMayow[3].x;
-		listenerPos[1] = modelMatrixMayow[3].y;
-		listenerPos[2] = modelMatrixMayow[3].z;
+		listenerPos[0] = jugador.modelMatrixJugador[3].x;
+		listenerPos[1] = jugador.modelMatrixJugador[3].y;
+		listenerPos[2] = jugador.modelMatrixJugador[3].z;
 		alListenerfv(AL_POSITION, listenerPos);
 
-		glm::vec3 upModel = glm::normalize(modelMatrixMayow[1]);
-		glm::vec3 frontModel = glm::normalize(modelMatrixMayow[2]);
+		glm::vec3 upModel = glm::normalize(jugador.modelMatrixJugador[1]);
+		glm::vec3 frontModel = glm::normalize(jugador.modelMatrixJugador[2]);
 
 		listenerOri[0] = frontModel.x;
 		listenerOri[1] = frontModel.y;
@@ -1871,7 +1839,7 @@ void prepareScene(){
 	modelGrass.setShader(&shaderMulLighting);
 
 	//Mayow
-	mayowModelAnimate.setShader(&shaderMulLighting);
+	jugador.setShader(&shaderMulLighting);
 
 	// NPCs
 	bobAnimate.setShader(&shaderMulLighting);
@@ -1900,7 +1868,7 @@ void prepareDepthScene(){
 	modelGrass.setShader(&shaderDepth);
 
 	//Mayow
-	mayowModelAnimate.setShader(&shaderDepth);
+	jugador.setShader(&shaderDepth);
 
 	// NPCs
 	bobAnimate.setShader(&shaderDepth);
@@ -2021,20 +1989,11 @@ void renderScene(bool renderParticles){
 	 * Custom Anim objects obj
 	 *******************************************/
 	#pragma region Renderizado de Mayow
-	modelMatrixMayow[3][1] = -GRAVITY * tmv * tmv + 3.5 * tmv + terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-	tmv = currTime - startTimeJump;
-	if(modelMatrixMayow[3][1] < terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2])){
-		isJump = false;
-		modelMatrixMayow[3][1] = terrain.getHeightTerrain(modelMatrixMayow[3][0], modelMatrixMayow[3][2]);
-	}
-	glm::mat4 modelMatrixMayowBody = glm::mat4(modelMatrixMayow);
-	modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021, 0.021, 0.021));
-	mayowModelAnimate.setAnimationIndex(animationIndex);
-	mayowModelAnimate.render(modelMatrixMayowBody);
+	jugador.update(&terrain);
 	#pragma endregion
 
 	#pragma region Renderizado de NPCs
-	bobAnimate.update(modelMatrixMayow, &terrain, collidersOBB, deltaTime);
+	bobAnimate.update(jugador.modelMatrixJugador, &terrain, collidersOBB, deltaTime);
 	#pragma endregion
 
 	/**********
