@@ -107,6 +107,8 @@ public:
 		this->distanceFromTarget = distanceFromTarget;
 	}
 
+	float angleAroundTarget, distanceFromTarget;
+
 protected:
 	glm::vec3 position;
 	glm::vec3 front;
@@ -116,8 +118,6 @@ protected:
 
 	glm::vec3 cameraTarget;
 	float angleTarget;
-	float distanceFromTarget;
-	float angleAroundTarget;
 
 	float yaw;
 	float pitch;

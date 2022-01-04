@@ -1244,6 +1244,14 @@ void mouseCallback(GLFWwindow *window, double xpos, double ypos) {
 
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 	distanceFromTarget -= yoffset;
+
+	if (distanceFromTarget <= 1.5f) {
+		distanceFromTarget = 1.5f;
+	}
+	else if (distanceFromTarget >= 10.0f) {
+		distanceFromTarget = 10.0f;
+	}
+
 	camera->setDistanceFromTarget(distanceFromTarget);
 }
 
@@ -1251,14 +1259,11 @@ void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
 	if (state == GLFW_PRESS) {
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_RIGHT:
-			std::cout << "lastMousePos.y:" << lastMousePosY << std::endl;
 			break;
 		case GLFW_MOUSE_BUTTON_LEFT:
-			std::cout << "lastMousePos.x:" << lastMousePosX << std::endl;
+			jugador.disparar(camera);
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
-			std::cout << "lastMousePos.x:" << lastMousePosX << std::endl;
-			std::cout << "lastMousePos.y:" << lastMousePosY << std::endl;
 			break;
 		}
 	}
@@ -1268,23 +1273,23 @@ bool processInput(bool continueApplication) {
 	if (exitApp || glfwWindowShouldClose(window) != 0) {
 		return false;
 	}
-
-	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-		camera->mouseMoveCamera(offsetX, 0.0, deltaTime);
-	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
-		camera->mouseMoveCamera(0.0, offsetY, deltaTime);
-	offsetX = 0;
-	offsetY = 0;
+	
+	// Mueve la cámara sin necesidad de presionar los botones
+	camera->mouseMoveCamera(0.5f * offsetX, 0.0, deltaTime);
+	camera->mouseMoveCamera(0.0, 0.5f * offsetY, deltaTime);
+	offsetX = 0; offsetY = 0;
 
 	#pragma region Movimientos de Mayow
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
-		jugador.girar(1.0f);
-	}else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
-		jugador.girar(-1.0f);
-	}if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
-		jugador.mover(0.2f);
-	}else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
-		jugador.mover(-0.2f);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+		jugador.moverX(camera, 0.2f);
+	}else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+		jugador.moverX(camera, -0.2f);
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+		jugador.moverZ(camera, 0.2f);
+	}else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+		jugador.moverZ(camera, -0.2f);
 	}
 	#pragma endregion
 
@@ -1379,8 +1384,8 @@ void applicationLoop() {
 
 		if(std::isnan(angleTarget))
 			angleTarget = 0.0;
-		if(axis.y < 0)
-			angleTarget = -angleTarget;
+		if (axis.y < 0)
+			angleTarget = -angleTarget + glm::radians(360.0f);
 		camera->setCameraTarget(target);
 		camera->setAngleTarget(angleTarget);
 		camera->updateCamera();
@@ -1725,6 +1730,8 @@ void applicationLoop() {
 					isCollision = true;
 
 					bobAnimate.colisionAtaque(&collidersOBB, it, jt);
+
+					jugador.colisionesBalas(&collidersOBB, it, jt);
 				}
 			}
 			addOrUpdateCollisionDetection(collisionDetection, it->first, isCollision);
@@ -1989,7 +1996,7 @@ void renderScene(bool renderParticles){
 	 * Custom Anim objects obj
 	 *******************************************/
 	#pragma region Renderizado de Mayow
-	jugador.update(&terrain);
+	jugador.update(collidersOBB, &terrain, deltaTime);
 	#pragma endregion
 
 	#pragma region Renderizado de NPCs

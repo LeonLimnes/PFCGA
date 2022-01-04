@@ -122,7 +122,7 @@ void NPC::update(glm::mat4 modelMatrixJugador, Terrain *terreno,
 
 		modelMatrixNPC[3][1] = terreno->getHeightTerrain(modelMatrixNPC[3][0], modelMatrixNPC[3][2]);
 		glm::mat4 modelMatrixNPCBody = glm::mat4(modelMatrixNPC);
-		modelo.render(modelMatrixNPCBody, deltaTime);
+		modelo.render(modelMatrixNPCBody, deltaTime/2);
 		modelo.setAnimationIndex(0);	// NPC en reposo
 
 		// Renderiza la red que porta el npc
