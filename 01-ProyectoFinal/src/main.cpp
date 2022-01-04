@@ -1362,7 +1362,7 @@ void applicationLoop() {
 	modelMatrixBartman = glm::scale(modelMatrixBartman, glm::vec3(5.0f, 5.0f, 5.0f));
 
 	// NPCs
-	bobAnimate.start("NPC-Bob", glm::vec3(0, 0, 20), 45.0f);
+	bobAnimate.start("NPC-Bob", glm::vec3(0, 0, 20), 0.0f);
 	#pragma endregion
 
 	lastTime = TimeManager::Instance().GetTime();
@@ -2034,7 +2034,7 @@ void renderScene(bool renderParticles){
 	#pragma endregion
 
 	#pragma region Renderizado de NPCs
-	bobAnimate.update(modelMatrixMayow, &terrain, deltaTime);
+	bobAnimate.update(modelMatrixMayow, &terrain, collidersOBB, deltaTime);
 	#pragma endregion
 
 	/**********

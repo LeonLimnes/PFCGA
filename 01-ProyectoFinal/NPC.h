@@ -10,23 +10,25 @@ public:
 	~NPC ();
 
 	// Variables
-	Model modelo;
+	Model modelo, red;
 	std::string nombre;
-	glm::mat4 modelMatrixNPC = glm::mat4(1.0f);
-	float escala = 0.02f;
+	glm::mat4 modelMatrixNPC = glm::mat4(1.0f), modelMatrixRed = glm::mat4(1.0f);
+	float escalaModelo = 0.02f, rotacionY, escalaRed = 1.5f;
 	float tiempoAtacando = 0.0f, tiempoMuriendo = 0.0f;
-	bool activo = true, atacando = false, muriendo = false;
+	bool activo = true, atacando = false, golpeando = false, muriendo = false;
 
 	AbstractModel::OBB npcCollider, colliderAtaque;
 	std::string nombreAtaque;
 
 	// Funciones
 	void start(std::string nombre, glm::vec3 posInicial, float rotInicial);
-	void update(std::shared_ptr<FirstPersonCamera> camara, float deltaTime);
-	void update(glm::mat4 modelMatrixJugador, Terrain *terreno, float deltaTime);
+	void update(glm::mat4 modelMatrixJugador, Terrain *terreno, 
+		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime);
 	void cargarModelo(const std::string & path, Shader *shader_ptr);
 	void setShader(Shader *shader_ptr);
 	void crearColisionador(std::map<std::string,
+		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders);
+	void crearColisionadorAtaque(std::map<std::string,
 		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders);
 	void colisionAtaque(
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
@@ -38,5 +40,9 @@ public:
 private:
 	// Variables
 	double a, b, h;
-	float anguloA, anguloB, distancia;
+	float anguloA, anguloB, distancia, rotacionXRed = -60.0f;
+	int estadoRed = 0;
+
+	// Funciones
+	float calcularRotacionY(float anguloA, float anguloB);
 };
