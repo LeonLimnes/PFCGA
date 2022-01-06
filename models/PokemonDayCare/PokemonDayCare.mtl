@@ -1,7 +1,29 @@
 # Blender MTL File: 'None'
-# Material Count: 4
+# Material Count: 6
 
-newmtl h_kage_lm5
+newmtl Material.001
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd _1.png
+
+newmtl Material.002
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tex003_1.png
+
+newmtl _1
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.784314 0.784314 0.784314
@@ -10,10 +32,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd h_kage_lm5.png
-map_d h_kage_lm5.png
+map_Kd _1.png
+map_d _1.png
 
-newmtl h_mado_lm1
+newmtl h_kage_1
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.784314 0.784314 0.784314
@@ -22,10 +44,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd h_mado_lm1.png
-map_d h_mado_lm1.png
+map_Kd h_kage_1.png
+map_d h_kage_1.png
 
-newmtl t2_house01_lm1
+newmtl h_mado_1
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.784314 0.784314 0.784314
@@ -34,10 +56,10 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd t2_house01_lm1.png
-map_d t2_house01_lm1.png
+map_Kd h_mado_1.png
+map_d h_mado_1.png
 
-newmtl t2_house01_lm2
+newmtl tex003_1
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.784314 0.784314 0.784314
@@ -46,5 +68,5 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd t2_house01_lm2.png
-map_d t2_house01_lm2.png
+map_Kd tex003_1.png
+map_d tex003_1.png
