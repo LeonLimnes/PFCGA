@@ -511,7 +511,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	boxLightViewBox.init();
 	boxLightViewBox.setShader(&shaderViewDepth);
 
-	modelAircraft.loadModel("../models/Aircraft_obj/E 45 Aircraft_obj.obj");
+	modelAircraft.loadModel("../models/Aircraft/Plane.obj");
 	modelAircraft.setShader(&shaderMulLighting);
 	#pragma endregion
 
@@ -1301,6 +1301,7 @@ void applicationLoop() {
 
 	#pragma region Transformaciones iniciales modelos 3D
 	modelMatrixAircraft = glm::translate(modelMatrixAircraft, glm::vec3(10.0, 2.0, -17.5));
+	modelMatrixAircraft = glm::scale(modelMatrixAircraft, glm::vec3(0.008, 0.008, 0.008));
 
 	//Casas
 	modelMatrixCasa = glm::translate(modelMatrixCasa, glm::vec3(56.25, 0.0, -37.89));
@@ -1590,10 +1591,10 @@ void applicationLoop() {
 		AbstractModel::OBB aircraftCollider;
 		// Set the orientation of collider before doing the scale
 		aircraftCollider.u = glm::quat_cast(modelMatrixAircraft);
-		modelMatrixColliderAircraft = glm::scale(modelMatrixColliderAircraft,glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixColliderAircraft = glm::scale(modelMatrixColliderAircraft,glm::vec3(0.008, 0.008, 0.008));
 		modelMatrixColliderAircraft = glm::translate(modelMatrixColliderAircraft, modelAircraft.getObb().c);
 		aircraftCollider.c = glm::vec3(modelMatrixColliderAircraft[3]);
-		aircraftCollider.e = modelAircraft.getObb().e * glm::vec3(1.0, 1.0, 1.0);
+		aircraftCollider.e = modelAircraft.getObb().e * glm::vec3(0.008, 0.008, 0.008);
 		addOrUpdateColliders(collidersOBB, "aircraft", aircraftCollider, modelMatrixAircraft);
 		#pragma endregion
 
@@ -2047,7 +2048,7 @@ void renderScene(bool renderParticles){
 		if(it->second.first.compare("aircraft") == 0){
 			// Render for the aircraft model
 			glm::mat4 modelMatrixAircraftBlend = glm::mat4(modelMatrixAircraft);
-			modelMatrixAircraftBlend[3][1] = terrain.getHeightTerrain(modelMatrixAircraftBlend[3][0], modelMatrixAircraftBlend[3][2]) + 2.0;
+			modelMatrixAircraftBlend[3][1] = terrain.getHeightTerrain(modelMatrixAircraftBlend[3][0], modelMatrixAircraftBlend[3][2]) + 1.0;
 			modelAircraft.render(modelMatrixAircraftBlend);
 		}
 		else if(renderParticles && it->second.first.compare("fountain") == 0){
