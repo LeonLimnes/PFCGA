@@ -115,7 +115,7 @@ Model modelFountain;
 
 // Modelos animados
 Model bartmanModelAnimate;		// Bart
-Model modelHazmat;				// Hazmat
+Model modelHazmat;				// Hazmat		
 Jugador jugador;				// Mayow
 NPC bobAnimate;					// Bob
 
@@ -574,7 +574,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	#pragma region Inicializacion de Mayow
 	//Mayow
-	jugador.cargarModelo("../models/mayow/personaje2.fbx", &shaderMulLighting);
+	jugador.cargarModelo("../models/Bart (Bartman)/BartAnim.fbx", &shaderMulLighting);
 	#pragma endregion
 	
 	#pragma region Inicializacion NPCs

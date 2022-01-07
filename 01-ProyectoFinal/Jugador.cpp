@@ -68,7 +68,7 @@ void Jugador::disparar(std::shared_ptr<Camera> camera) {
 			// Inicializa la bala dependiendo la posición y orientación del jugador
 			balas[i].modelMatrixBala = glm::mat4(modelMatrixJugador);
 			balas[i].modelMatrixBala = glm::translate(balas[i].modelMatrixBala, glm::vec3(0, 0, 1.5f));
-			break;
+			indiceAnimacion = 2;
 		}
 	}
 }
