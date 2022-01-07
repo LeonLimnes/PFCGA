@@ -166,6 +166,7 @@ std::vector<glm::vec3> lamp1Position = { glm::vec3(-53.51, 0, -20.70), glm::vec3
 		glm::vec3(-21.87, 0, -19.92)};
 std::vector<float> lamp1Orientation = { -17.0, -82.67, 23.70, -17.0, -82.67, 23.70, -17.0, -82.67, 23.70 };
 
+// Trees positions
 std::vector<glm::vec3> treePosition = { 
 		glm::vec3(-24.21, 0, -66.79),
 		glm::vec3(-49.21, 0, -60.54),
@@ -188,6 +189,24 @@ std::vector<float> treeOrientation = {
 	15.60 + 90,
 	80.85 + 90	*/
 };
+
+//Grass position
+std::vector<glm::vec3> grassPosition = {
+		glm::vec3(-22.21, 1.0, -66.79),
+		glm::vec3(-49.21, 1.0, -60.54),
+		glm::vec3(-72.65, 1.0, -19.53),
+		glm::vec3(-47.65, 1.0, 0.39),
+		glm::vec3(-56.64, 1.0, 48.43), 
+		glm::vec3(-23.43, 1.0, 55.85),
+		glm::vec3(23.43, 1.0, 45.70),
+		glm::vec3(64.84, 1.0, 50.78),
+		glm::vec3(57.81, 1.0, -0.39),
+		glm::vec3(76.56, 1.0, -19.92),
+		glm::vec3(29.29, 1.0, -61.71),
+		glm::vec3(55.07, 1.0, -68.75),
+		glm::vec3(0.07, 1.0, -2.75),
+};
+
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = {
@@ -560,7 +579,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	#pragma region Inicializacion pasto 3D
 	//Grass
-	modelGrass.loadModel("../models/grass/grassModel.obj");
+	modelGrass.loadModel("../models/grass/grassModel.obj");  //grass/grassModel.obj");
 	modelGrass.setShader(&shaderMulLighting);
 	#pragma endregion
 
@@ -1912,6 +1931,9 @@ void prepareScene(){
 	// Grass
 	modelGrass.setShader(&shaderMulLighting);
 
+	//Fuente
+	modelFountain.setShader(&shaderMulLighting);
+
 	// Bart
 	jugador.setShader(&shaderMulLighting);
 
@@ -1941,6 +1963,9 @@ void prepareDepthScene(){
 	// Lamp models
 	modelLamp1.setShader(&shaderDepth);
 	modelLamp2.setShader(&shaderDepth);
+
+	// Fuente
+	modelFountain.setShader(&shaderDepth);
 	
 	// Tree
 	modelTree.setShader(&shaderDepth);
@@ -2049,12 +2074,15 @@ void renderScene(bool renderParticles){
 
 	#pragma region Renderizado del pasto 3D
 	// Grass
-	glDisable(GL_CULL_FACE);
-	glm::vec3 grassPosition = glm::vec3(-15.0, 0.0, -3.0);
-	grassPosition.y = terrain.getHeightTerrain(grassPosition.x, grassPosition.z);
-	modelGrass.setPosition(grassPosition);
-	modelGrass.render();
-	glEnable(GL_CULL_FACE);
+	for (int i = 0; i < grassPosition.size(); i++) {
+		glDisable(GL_CULL_FACE);
+		//glm::vec3 grassPosition = glm::vec3(-15.0, 0.0, -3.0);
+		//grassPosition[i].y = terrain.getHeightTerrain(grassPosition[i].x, grassPosition[i].z);
+		modelGrass.setPosition(grassPosition[i]);
+		modelGrass.setScale(glm::vec3(0.9, 0.9, 0.9));
+		modelGrass.render();
+		glEnable(GL_CULL_FACE);
+	}
 	#pragma endregion
 
 	#pragma region Renderizado fuente de agua
@@ -2074,11 +2102,11 @@ void renderScene(bool renderParticles){
 	#pragma region Renderizado de NPCs
 	// Gatos
 	bobAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	/*mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	rosieAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	oliviaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	kikiAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);*/
 	#pragma endregion
 
 	/**********
