@@ -486,7 +486,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shaderMulLighting.initialize("../Shaders/iluminacion_textura_animation_shadow.vs", "../Shaders/multipleLights_shadow.fs");
 	shaderTerrain.initialize("../Shaders/terrain_shadow.vs", "../Shaders/terrain_shadow.fs");
 	shaderParticlesFountain.initialize("../Shaders/particlesFountain.vs", "../Shaders/particlesFountain.fs");
-	shaderParticlesFire.initialize("../Shaders/particlesFire.vs", "../Shaders/particlesFire.fs", {"Position", "Velocity", "Age"});
+	shaderParticlesFire.initialize("../Shaders/particlesSmoke.vs", "../Shaders/particlesSmoke.fs", {"Position", "Velocity", "Age"});
 	shaderViewDepth.initialize("../Shaders/texturizado.vs", "../Shaders/texturizado_depth_view.fs");
 	shaderDepth.initialize("../Shaders/shadow_mapping_depth.vs", "../Shaders/shadow_mapping_depth.fs");
 	#pragma endregion
@@ -578,11 +578,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	bobAnimate.cargarModelo("../models/AnimalCrossing/Cats/Bob.fbx", &shaderMulLighting);	// Bob
 	#pragma endregion
 
-	#pragma region Inicializacion de Bart
-	//Bartman  AccumulaTownHouse
-	bartmanModelAnimate.loadModel("../models/CelesticTownHouse/CelesticTownHouse.obj");   // Bartman / BartMan.fbx");
-	bartmanModelAnimate.setShader(&shaderMulLighting);
-	#pragma endregion
 
 	// Modelos de casas
 	//AccumulaTownHouse/Accumula Town House.obj"
@@ -1575,6 +1570,20 @@ void applicationLoop() {
 		bobAnimate.crearColisionador(collidersOBB);
 		#pragma endregion
 
+		#pragma region Colisionador Fuente
+		// Collider de fuente
+		glm::mat4 modelMatrixColliderFountain =  glm::mat4(modelMatrixFountain);
+		AbstractModel::OBB fountaintCollider;
+		// Set the orientation of collider before doing the scale
+		fountaintCollider.u = glm::quat_cast(modelMatrixFountain);
+		modelMatrixColliderFountain = glm::scale(modelMatrixColliderFountain, glm::vec3(4.8, 7.0, 4.9));
+		modelMatrixColliderFountain = glm::translate(modelMatrixColliderFountain, glm::vec3(-0.1, 0.0, 0.10));
+		fountaintCollider.c = glm::vec3(modelMatrixColliderFountain[3]);
+		fountaintCollider.e = modelFountain.getObb().e * glm::vec3(4.8, 7.0, 4.9);
+		addOrUpdateColliders(collidersOBB, "fuente", fountaintCollider, modelMatrixFountain);
+
+		#pragma endregion
+
 		#pragma region Colisionador nave espacial
 		// Collider del aricraft
 		glm::mat4 modelMatrixColliderAircraft = glm::mat4(modelMatrixAircraft);
@@ -1594,60 +1603,61 @@ void applicationLoop() {
 		AbstractModel::OBB casaCollider;
 		// Set the orientation of collider before doing the scale
 		casaCollider.u = glm::quat_cast(modelMatrixCasa);
-		modelMatrixColliderCasa = glm::scale(modelMatrixColliderCasa, glm::vec3(0.1, 0.1, 0.1));
+		modelMatrixColliderCasa = glm::scale(modelMatrixColliderCasa, glm::vec3(0.085, 0.1, 0.085));
 		modelMatrixColliderCasa = glm::translate(modelMatrixColliderCasa, modelCasa.getObb().c);
+		modelMatrixColliderCasa = glm::rotate(modelMatrixColliderCasa, glm::radians(-140.0f), glm::vec3(0, 1, 0));
 		casaCollider.c = glm::vec3(modelMatrixColliderCasa[3]);
-		casaCollider.e = modelCasa.getObb().e * glm::vec3(0.1, 0.1, 0.1);
+		casaCollider.e = modelCasa.getObb().e * glm::vec3(0.085, 0.1, 0.085);
 		addOrUpdateColliders(collidersOBB, "casa", casaCollider, modelMatrixCasa);
 
 		glm::mat4 modelMatrixColliderCasa2 = glm::mat4(modelMatrixCasa2);
 		AbstractModel::OBB casaCollider2;
 		// Set the orientation of collider before doing the scale
 		casaCollider2.u = glm::quat_cast(modelMatrixCasa2);
-		modelMatrixColliderCasa2 = glm::scale(modelMatrixColliderCasa2, glm::vec3(0.1, 0.1, 0.1));
+		modelMatrixColliderCasa2 = glm::scale(modelMatrixColliderCasa2, glm::vec3(0.085, 0.1, 0.085));
 		modelMatrixColliderCasa2 = glm::translate(modelMatrixColliderCasa2, modelCasa2.getObb().c);
 		casaCollider2.c = glm::vec3(modelMatrixColliderCasa2[3]);
-		casaCollider2.e = modelCasa2.getObb().e * glm::vec3(0.1, 0.1, 0.1);
+		casaCollider2.e = modelCasa2.getObb().e * glm::vec3(0.085, 0.1, 0.085);
 		addOrUpdateColliders(collidersOBB, "casa2", casaCollider2, modelMatrixCasa2);
 
 		glm::mat4 modelMatrixColliderCasa3 = glm::mat4(modelMatrixCasa3);
 		AbstractModel::OBB casaCollider3;
 		// Set the orientation of collider before doing the scale
 		casaCollider3.u = glm::quat_cast(modelMatrixCasa3);
-		modelMatrixColliderCasa3 = glm::scale(modelMatrixColliderCasa3, glm::vec3(0.1, 0.1, 0.1));
+		modelMatrixColliderCasa3 = glm::scale(modelMatrixColliderCasa3, glm::vec3(0.085, 0.1, 0.085));
 		modelMatrixColliderCasa3 = glm::translate(modelMatrixColliderCasa3, modelCasa3.getObb().c);
 		casaCollider3.c = glm::vec3(modelMatrixColliderCasa3[3]);
-		casaCollider3.e = modelCasa3.getObb().e * glm::vec3(0.1, 0.1, 0.1);
+		casaCollider3.e = modelCasa3.getObb().e * glm::vec3(0.085, 0.1, 0.085);
 		addOrUpdateColliders(collidersOBB, "casa3", casaCollider3, modelMatrixCasa3);
 
 		glm::mat4 modelMatrixColliderCasa4 = glm::mat4(modelMatrixCasa4);
 		AbstractModel::OBB casaCollider4;
 		// Set the orientation of collider before doing the scale
 		casaCollider4.u = glm::quat_cast(modelMatrixCasa4);
-		modelMatrixColliderCasa4 = glm::scale(modelMatrixColliderCasa4, glm::vec3(0.1, 0.1, 0.1));
+		modelMatrixColliderCasa4 = glm::scale(modelMatrixColliderCasa4, glm::vec3(0.085, 0.1, 0.085));
 		modelMatrixColliderCasa4 = glm::translate(modelMatrixColliderCasa4, modelCasa4.getObb().c);
 		casaCollider4.c = glm::vec3(modelMatrixColliderCasa4[3]);
-		casaCollider4.e = modelCasa4.getObb().e * glm::vec3(0.1, 0.1, 0.1);
+		casaCollider4.e = modelCasa4.getObb().e * glm::vec3(0.085, 0.1, 0.085);
 		addOrUpdateColliders(collidersOBB, "casa4", casaCollider4, modelMatrixCasa4);
 
 		glm::mat4 modelMatrixColliderCasa5 = glm::mat4(modelMatrixCasa5);
 		AbstractModel::OBB casaCollider5;
 		// Set the orientation of collider before doing the scale
 		casaCollider5.u = glm::quat_cast(modelMatrixCasa5);
-		modelMatrixColliderCasa5 = glm::scale(modelMatrixColliderCasa5, glm::vec3(0.1, 0.1, 0.1));
+		modelMatrixColliderCasa5 = glm::scale(modelMatrixColliderCasa5, glm::vec3(0.085, 0.1, 0.085));
 		modelMatrixColliderCasa5 = glm::translate(modelMatrixColliderCasa5, modelCasa5.getObb().c);
 		casaCollider5.c = glm::vec3(modelMatrixColliderCasa5[3]);
-		casaCollider5.e = modelCasa5.getObb().e * glm::vec3(0.1, 0.1, 0.1);
+		casaCollider5.e = modelCasa5.getObb().e * glm::vec3(0.085, 0.1, 0.085);
 		addOrUpdateColliders(collidersOBB, "casa5", casaCollider5, modelMatrixCasa5);
 
 		glm::mat4 modelMatrixColliderCasa6 = glm::mat4(modelMatrixCasa6);
 		AbstractModel::OBB casaCollider6;
 		// Set the orientation of collider before doing the scale
 		casaCollider6.u = glm::quat_cast(modelMatrixCasa6);
-		modelMatrixColliderCasa6 = glm::scale(modelMatrixColliderCasa6, glm::vec3(0.1, 0.1, 0.1));
+		modelMatrixColliderCasa6 = glm::scale(modelMatrixColliderCasa6, glm::vec3(0.085, 0.1, 0.085));
 		modelMatrixColliderCasa6 = glm::translate(modelMatrixColliderCasa6, modelCasa6.getObb().c);
 		casaCollider6.c = glm::vec3(modelMatrixColliderCasa6[3]);
-		casaCollider6.e = modelCasa6.getObb().e * glm::vec3(0.1, 0.1, 0.1);
+		casaCollider6.e = modelCasa6.getObb().e * glm::vec3(0.085, 0.1, 0.085);
 		addOrUpdateColliders(collidersOBB, "casa6", casaCollider6, modelMatrixCasa6);
 		#pragma endregion
 
@@ -1674,14 +1684,14 @@ void applicationLoop() {
 			glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
 			modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp, lamp2Position[i]);
 			modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp, glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
-			addOrUpdateColliders(collidersOBB, "Árbol-" + std::to_string(i), lampCollider, modelMatrixColliderLamp);
+			addOrUpdateColliders(collidersOBB, "Arbol-" + std::to_string(i), lampCollider, modelMatrixColliderLamp);
 			// Set the orientation of collider before doing the scale
 			lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
 			modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp, glm::vec3(0.0095, 0.018, 0.0055));
 			modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp, modelLampPost2.getObb().c);
 			lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
 			lampCollider.e = modelLampPost2.getObb().e * glm::vec3(0.0095, 0.018, 0.0055);
-			std::get<0>(collidersOBB.find("Árbol-" + std::to_string(i))->second) = lampCollider;
+			std::get<0>(collidersOBB.find("Arbol-" + std::to_string(i))->second) = lampCollider;
 		}
 		#pragma endregion
 
@@ -1978,7 +1988,7 @@ void renderScene(bool renderParticles){
 	#pragma region Renderizado del pasto 3D
 	// Grass
 	glDisable(GL_CULL_FACE);
-	glm::vec3 grassPosition = glm::vec3(0.0, 0.0, 0.0);
+	glm::vec3 grassPosition = glm::vec3(-15.0, 0.0, -3.0);
 	grassPosition.y = terrain.getHeightTerrain(grassPosition.x, grassPosition.z);
 	modelGrass.setPosition(grassPosition);
 	modelGrass.render();

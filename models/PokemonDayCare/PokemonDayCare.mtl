@@ -1,7 +1,7 @@
 # Blender MTL File: 'None'
 # Material Count: 6
 
-newmtl Material.001
+newmtl Material.005
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -12,7 +12,7 @@ d 1.000000
 illum 2
 map_Kd _1.png
 
-newmtl Material.002
+newmtl Material.006
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -23,7 +23,7 @@ d 1.000000
 illum 2
 map_Kd tex003_1.png
 
-newmtl _1
+newmtl _1.001
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.784314 0.784314 0.784314
@@ -35,7 +35,7 @@ illum 1
 map_Kd _1.png
 map_d _1.png
 
-newmtl h_kage_1
+newmtl h_kage_1.001
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.784314 0.784314 0.784314
@@ -47,7 +47,7 @@ illum 1
 map_Kd h_kage_1.png
 map_d h_kage_1.png
 
-newmtl h_mado_1
+newmtl h_mado_1.001
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.784314 0.784314 0.784314
@@ -59,7 +59,7 @@ illum 1
 map_Kd h_mado_1.png
 map_d h_mado_1.png
 
-newmtl tex003_1
+newmtl tex003_1.001
 Ns 0.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.784314 0.784314 0.784314
