@@ -34,7 +34,7 @@ uniform mat4 projection;
 vec3 randomInitialVelocity() {
     float theta = mix(0.0, PI/1.5, texelFetch(RandomTex, 3 * gl_VertexID, 0).r);
 	float phi = mix(0.0, 2.0 * PI, texelFetch(RandomTex, 3 * gl_VertexID + 1, 0).r);
-	float velocity = mix(0.0, 0.9, texelFetch(RandomTex, 3 * gl_VertexID + 2, 0).r);
+	float velocity = mix(0.0, 1.1, texelFetch(RandomTex, 3 * gl_VertexID + 2, 0).r);
 	vec3 v = vec3(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
 	return normalize(EmitterBasis * v) * velocity;
 }

@@ -76,6 +76,7 @@ Shader shaderTerrain;
 Shader shaderParticlesFountain;
 //Shader para las particulas de fuego
 Shader shaderParticlesFire;
+Shader shaderParticlesFire2;
 //Shader para visualizar el buffer de profundidad
 Shader shaderViewDepth;
 //Shader para dibujar el buffer de profunidad
@@ -488,6 +489,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shaderTerrain.initialize("../Shaders/terrain_shadow.vs", "../Shaders/terrain_shadow.fs");
 	shaderParticlesFountain.initialize("../Shaders/particlesFountain.vs", "../Shaders/particlesFountain.fs");
 	shaderParticlesFire.initialize("../Shaders/particlesSmoke.vs", "../Shaders/particlesSmoke.fs", {"Position", "Velocity", "Age"});
+	shaderParticlesFire2.initialize("../Shaders/particlesSmoke.vs", "../Shaders/particlesSmoke.fs", { "Position", "Velocity", "Age" });
 	shaderViewDepth.initialize("../Shaders/texturizado.vs", "../Shaders/texturizado_depth_view.fs");
 	shaderDepth.initialize("../Shaders/shadow_mapping_depth.vs", "../Shaders/shadow_mapping_depth.fs");
 	#pragma endregion
@@ -963,7 +965,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	#pragma endregion
 
 	#pragma region Textura particulas de fuego
-	Texture textureParticleFire("../Textures/fire.png");
+	Texture textureParticleFire("../Textures/smoke.png");
 	bitmap = textureParticleFire.loadImage();
 	data = textureParticleFire.convertToData(bitmap, imageWidth, imageHeight);
 	glGenTextures(1, &textureParticleFireID);
@@ -1006,8 +1008,16 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shaderParticlesFire.setInt("RandomTex", 1);
 	shaderParticlesFire.setFloat("ParticleLifetime", particleLifetime);
 	shaderParticlesFire.setFloat("ParticleSize", particleSize);
-	shaderParticlesFire.setVectorFloat3("Accel", glm::value_ptr(glm::vec3(0.0f,0.1f,0.0f)));
+	shaderParticlesFire.setVectorFloat3("Accel", glm::value_ptr(glm::vec3(0.0f,0.01f,0.0f)));
 	shaderParticlesFire.setVectorFloat3("Emitter", glm::value_ptr(glm::vec3(0.0f)));
+
+	shaderParticlesFire2.setInt("Pass", 1);
+	shaderParticlesFire2.setInt("ParticleTex", 0);
+	shaderParticlesFire2.setInt("RandomTex", 1);
+	shaderParticlesFire2.setFloat("ParticleLifetime", particleLifetime);
+	shaderParticlesFire2.setFloat("ParticleSize", particleSize);
+	shaderParticlesFire2.setVectorFloat3("Accel", glm::value_ptr(glm::vec3(0.0f, 0.01f, 0.0f)));
+	shaderParticlesFire2.setVectorFloat3("Emitter", glm::value_ptr(glm::vec3(0.0f)));
 
 	glm::mat3 basis;
 	glm::vec3 u, v, n;
@@ -1021,6 +1031,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	basis[1] = glm::normalize(v);
 	basis[2] = glm::normalize(n);
 	shaderParticlesFire.setMatrix3("EmitterBasis", 1, false, glm::value_ptr(basis));
+	shaderParticlesFire2.setMatrix3("EmitterBasis", 1, false, glm::value_ptr(basis));
 	#pragma endregion
 
 	/*******************************************
@@ -1143,7 +1154,7 @@ void destroy() {
 	shaderTerrain.destroy();
 	shaderParticlesFountain.destroy();
 	shaderParticlesFire.destroy();
-
+	shaderParticlesFire2.destroy();
 	// Basic objects Delete
 	skyboxSphere.destroy();
 	boxCollider.destroy();
@@ -1426,6 +1437,10 @@ void applicationLoop() {
 		shaderParticlesFire.setInt("Pass", 2);
 		shaderParticlesFire.setMatrix4("projection", 1, false, glm::value_ptr(projection));
 		shaderParticlesFire.setMatrix4("view", 1, false, glm::value_ptr(view));
+
+		shaderParticlesFire2.setInt("Pass", 2);
+		shaderParticlesFire2.setMatrix4("projection", 1, false, glm::value_ptr(projection));
+		shaderParticlesFire2.setMatrix4("view", 1, false, glm::value_ptr(view));
 		#pragma endregion
 
 		#pragma region Renderizado de la neblina
@@ -2113,11 +2128,12 @@ void renderScene(bool renderParticles){
 			glDrawArrays(GL_POINTS, 0, nParticlesFire);
 			glEndTransformFeedback();
 			glDisable(GL_RASTERIZER_DISCARD);
-
+			
+			// Particulas de fuego(humo) de las casas con chimenea
 			shaderParticlesFire.setInt("Pass", 2);
 			glm::mat4 modelFireParticles = glm::mat4(1.0);
-			modelFireParticles = glm::translate(modelFireParticles, it->second.second);
-			modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]);
+			modelFireParticles = glm::translate(modelFireParticles, glm::vec3(-4.24, 10.5, 46.87));
+			//modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]);
 			shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
 
 			shaderParticlesFire.turnOn();
@@ -2145,8 +2161,62 @@ void renderScene(bool renderParticles){
 			/**********
 			 * End Render particles systems
 			 */
-		}
+		
+			 /**********
+			  * Init Render particles systems fire 2
+			  */
+			 lastTimeParticlesAnimationFire = currTimeParticlesAnimationFire;
+			 currTimeParticlesAnimationFire = TimeManager::Instance().GetTime();
 
+			 shaderParticlesFire.setInt("Pass", 1);
+			 shaderParticlesFire.setFloat("Time", currTimeParticlesAnimationFire);
+			 shaderParticlesFire.setFloat("DeltaT", currTimeParticlesAnimationFire - lastTimeParticlesAnimationFire);
+
+			 glActiveTexture(GL_TEXTURE1);
+			 glBindTexture(GL_TEXTURE_1D, texId);
+			 glEnable(GL_RASTERIZER_DISCARD);
+			 glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedback[drawBuf]);
+			 glBeginTransformFeedback(GL_POINTS);
+			 glBindVertexArray(particleArray[1 - drawBuf]);
+			 glVertexAttribDivisor(0, 0);
+			 glVertexAttribDivisor(1, 0);
+			 glVertexAttribDivisor(2, 0);
+			 glDrawArrays(GL_POINTS, 0, nParticlesFire);
+			 glEndTransformFeedback();
+			 glDisable(GL_RASTERIZER_DISCARD);
+
+			 // Particulas de fuego(humo) de la casa 2
+			 shaderParticlesFire2.setInt("Pass", 2);
+			 glm::mat4 modelFireParticles2 = glm::mat4(1.0);
+			 modelFireParticles2 = glm::translate(modelFireParticles2, glm::vec3(59.0, 10.5, -36.89));
+			 shaderParticlesFire2.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles2));
+
+			 shaderParticlesFire2.turnOn();
+			 glActiveTexture(GL_TEXTURE0);
+			 glBindTexture(GL_TEXTURE_2D, textureParticleFireID);
+			 glDepthMask(GL_FALSE);
+			 glBindVertexArray(particleArray[drawBuf]);
+			 glVertexAttribDivisor(0, 1);
+			 glVertexAttribDivisor(1, 1);
+			 glVertexAttribDivisor(2, 1);
+			 glDrawArraysInstanced(GL_TRIANGLES, 0, 6, nParticlesFire);
+			 glBindVertexArray(0);
+			 glDepthMask(GL_TRUE);
+			 drawBuf = 1 - drawBuf;
+			 shaderParticlesFire.turnOff();
+
+			 /****************************+
+			  * Open AL sound data
+			  */
+			 source1Pos[0] = modelFireParticles2[3].x;
+			 source1Pos[1] = modelFireParticles2[3].y;
+			 source1Pos[2] = modelFireParticles2[3].z;
+			 alSourcefv(source[1], AL_POSITION, source1Pos);
+
+			 /**********
+			  * End Render particles systems
+			  */
+		}
 	}
 	#pragma endregion
 }
