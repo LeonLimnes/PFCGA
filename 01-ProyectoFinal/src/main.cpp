@@ -116,7 +116,7 @@ Model modelFountain;
 // Modelos animados
 Model modelHazmat;				// Hazmat		
 Jugador jugador;				// Mayow
-NPC bobAnimate;					// Bob
+NPC bobAnimate, mitziAnimate, rosieAnimate, oliviaAnimate, kikiAnimate, tangyAnimate;
 
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/AlturasMapa.png");
@@ -570,13 +570,19 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelFountain.setShader(&shaderMulLighting);
 	#pragma endregion
 
-	#pragma region Inicializacion de Mayow
-	//Mayow
+	#pragma region Inicializacion de Jugador
+	// Jugador (Bart)
 	jugador.cargarModelo("../models/Bart (Bartman)/BartAnim.fbx", &shaderMulLighting);
 	#pragma endregion
 	
 	#pragma region Inicializacion NPCs
-	bobAnimate.cargarModelo("../models/AnimalCrossing/Cats/Bob.fbx", &shaderMulLighting);	// Bob
+	// Gatos
+	bobAnimate.cargarModelo("../models/AnimalCrossing/Cats/Bob.fbx", &shaderMulLighting);		// Bob
+	mitziAnimate.cargarModelo("../models/AnimalCrossing/Cats/Mitzi.fbx", &shaderMulLighting);	// Mitzi
+	rosieAnimate.cargarModelo("../models/AnimalCrossing/Cats/Rosie.fbx", &shaderMulLighting);	// Rosie
+	oliviaAnimate.cargarModelo("../models/AnimalCrossing/Cats/Olivia.fbx", &shaderMulLighting);	// Olivia
+	kikiAnimate.cargarModelo("../models/AnimalCrossing/Cats/Kiki.fbx", &shaderMulLighting);		// Kiki
+	tangyAnimate.cargarModelo("../models/AnimalCrossing/Cats/Tangy.fbx", &shaderMulLighting);	// Tangy
 	#pragma endregion
 
 
@@ -1183,8 +1189,13 @@ void destroy() {
 	modelHazmat.destroy();			// hazmat
 
 	// Custom objects animate
-	jugador.destroy();				// Mayow
+	jugador.destroy();				// Bart
 	bobAnimate.destroy();
+	mitziAnimate.destroy();
+	rosieAnimate.destroy();
+	oliviaAnimate.destroy();
+	kikiAnimate.destroy();
+	tangyAnimate.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -1345,6 +1356,11 @@ void applicationLoop() {
 
 	// NPCs (enemigos)
 	bobAnimate.start("NPC-Bob", glm::vec3(0, 0, 20), 0.0f);
+	mitziAnimate.start("NPC-Mitzi", glm::vec3(13.5, 0, 40), 0.0f);
+	rosieAnimate.start("NPC-Rosie", glm::vec3(-8, 0, 10), 0.0f);
+	oliviaAnimate.start("NPC-Olivia", glm::vec3(-25, 0, 20), 0.0f);
+	kikiAnimate.start("NPC-Kiki", glm::vec3(-25, 0, -20), 0.0f);
+	tangyAnimate.start("NPC-Tangy", glm::vec3(70, 0, 50), 0.0f);
 	#pragma endregion
 
 	lastTime = TimeManager::Instance().GetTime();
@@ -1577,6 +1593,11 @@ void applicationLoop() {
 		 *******************************************/
 		#pragma region Colisionadores NPCs
 		bobAnimate.crearColisionador(collidersOBB);
+		mitziAnimate.crearColisionador(collidersOBB);
+		rosieAnimate.crearColisionador(collidersOBB);
+		oliviaAnimate.crearColisionador(collidersOBB);
+		kikiAnimate.crearColisionador(collidersOBB);
+		tangyAnimate.crearColisionador(collidersOBB);
 		#pragma endregion
 
 		#pragma region Colisionador Fuente
@@ -1750,8 +1771,12 @@ void applicationLoop() {
 				if (it != jt && testOBBOBB(std::get<0>(it->second), std::get<0>(jt->second))) {
 					isCollision = true;
 
-					bobAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);
-					bobAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					bobAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);		bobAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					mitziAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	mitziAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					rosieAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	rosieAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					oliviaAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	oliviaAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					kikiAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	kikiAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					tangyAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	tangyAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
 
 					jugador.colisionesBalas(&collidersOBB, it, jt);
 				}
@@ -1797,10 +1822,27 @@ void applicationLoop() {
 					addOrUpdateColliders(collidersOBB, jt->first);
 				else {
 					// Verifica que el jugador y NPCs no atraviesen otros objetos
-					if (jt->first.compare(jugador.nombre) == 0)
+					if (jt->first.compare(jugador.nombre) == 0) {
 						jugador.modelMatrixJugador = std::get<1>(jt->second);
-					else if (jt->first.compare(bobAnimate.nombre) == 0)
+					}
+					else if (jt->first.compare(bobAnimate.nombre) == 0) {
 						bobAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(mitziAnimate.nombre) == 0) {
+						mitziAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(rosieAnimate.nombre) == 0) {
+						rosieAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(oliviaAnimate.nombre) == 0) {
+						oliviaAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(kikiAnimate.nombre) == 0) {
+						kikiAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(tangyAnimate.nombre) == 0) {
+						tangyAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
 				}
 			}
 		}
@@ -1862,19 +1904,24 @@ void prepareScene(){
 
 	terrain.setShader(&shaderTerrain);
 
-	//Lamp models
+	// Lamp models
 	modelLamp1.setShader(&shaderMulLighting);
 	modelLamp2.setShader(&shaderMulLighting);
 	modelTree.setShader(&shaderMulLighting);
 
-	//Grass
+	// Grass
 	modelGrass.setShader(&shaderMulLighting);
 
-	//Mayow
+	// Bart
 	jugador.setShader(&shaderMulLighting);
 
 	// NPCs
 	bobAnimate.setShader(&shaderMulLighting);
+	mitziAnimate.setShader(&shaderMulLighting);
+	rosieAnimate.setShader(&shaderMulLighting);
+	oliviaAnimate.setShader(&shaderMulLighting);
+	kikiAnimate.setShader(&shaderMulLighting);
+	tangyAnimate.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene(){
@@ -1891,21 +1938,26 @@ void prepareDepthScene(){
 
 	terrain.setShader(&shaderDepth);
 
-	//Lamp models
+	// Lamp models
 	modelLamp1.setShader(&shaderDepth);
 	modelLamp2.setShader(&shaderDepth);
 	
 	// Tree
 	modelTree.setShader(&shaderDepth);
 
-	//Grass
+	// Grass
 	modelGrass.setShader(&shaderDepth);
 
-	//Mayow
+	// Bart
 	jugador.setShader(&shaderDepth);
 
 	// NPCs
 	bobAnimate.setShader(&shaderDepth);
+	mitziAnimate.setShader(&shaderDepth);
+	rosieAnimate.setShader(&shaderDepth);
+	oliviaAnimate.setShader(&shaderDepth);
+	kikiAnimate.setShader(&shaderDepth);
+	tangyAnimate.setShader(&shaderDepth);
 }
 
 void renderScene(bool renderParticles){
@@ -2020,7 +2072,13 @@ void renderScene(bool renderParticles){
 	#pragma endregion
 
 	#pragma region Renderizado de NPCs
+	// Gatos
 	bobAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	rosieAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	oliviaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	kikiAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	#pragma endregion
 
 	/**********

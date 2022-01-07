@@ -35,7 +35,7 @@ void Bala::crearColisionador(std::map<std::string,
 		balaCollider.u = glm::quat_cast(modelmatrixColliderBala);
 		modelmatrixColliderBala = glm::scale(modelmatrixColliderBala, glm::vec3(1.0, 1.0, 1.0));
 		balaCollider.c = glm::vec3(modelmatrixColliderBala[3]);
-		balaCollider.e = glm::vec3(1.0, 1.0, 1.0);
+		balaCollider.e = glm::vec3(0.4, 0.4, 0.7);
 		addOrUpdateColliders(colliders, nombre, balaCollider, modelMatrixBala);
 	}
 }

@@ -38,12 +38,31 @@ void Jugador::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::m
 		// El jugador muere (pierde el juego)
 		if (salud <= 0) {
 			tiempoDisparando = 0.0f;
+			tiempoMuriendo = 0.0f;
+			modelo.runningTime = 0.0f;
 			salud = 0;
-			disparando = false;
 			colliders.erase(nombre);
-			printf("Fin del juego\n");
+			disparando = false;
+			muriendo = true;
 			activo = false;
+			printf("Fin del juego\n");
 		}
+	}
+
+	if (muriendo) {
+		tiempoMuriendo += deltaTime;
+		indiceAnimacion = 3;
+		
+		if (tiempoMuriendo >= 4.3f) {
+			tiempoMuriendo = 0.0f;
+			muriendo = false;
+			muerto = true;
+		}
+	}
+
+	if (muerto) {
+		indiceAnimacion = 3;
+		modelo.runningTime = 4.3f;
 	}
 
 	// Renderizado del jugador
@@ -98,7 +117,8 @@ void Jugador::disparar(std::shared_ptr<Camera> camera) {
 
 				// Inicializa la bala dependiendo la posición y orientación del jugador
 				balas[i].modelMatrixBala = glm::mat4(modelMatrixJugador);
-				balas[i].modelMatrixBala = glm::translate(balas[i].modelMatrixBala, glm::vec3(0, 0, 1.5f));
+				balas[i].modelMatrixBala = glm::translate(balas[i].modelMatrixBala, glm::vec3(0, 1.5f, 1.5f));
+				balas[i].modelMatrixBala = glm::rotate(balas[i].modelMatrixBala, camera->getPitch(), glm::vec3(1, 0, 0));
 
 				// Variables para activar la animación
 				tiempoDisparando = 0.0f;

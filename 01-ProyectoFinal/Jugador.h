@@ -42,6 +42,6 @@ public:
 
 private:
 	// Variables
-	bool disparando = false;
-	float tiempoDisparando = 0.0f;
+	bool disparando = false, muriendo = false, muerto = false;
+	float tiempoDisparando = 0.0f, tiempoMuriendo = 0.0f;
 };

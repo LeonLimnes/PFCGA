@@ -107,6 +107,10 @@ public:
 		this->distanceFromTarget = distanceFromTarget;
 	}
 
+	float getPitch() {
+		return this->pitch;
+	}
+
 	float angleAroundTarget, distanceFromTarget;
 
 protected:
