@@ -14,6 +14,7 @@ public:
 	// Variables
 	Model modelo;
 	std::string nombre;
+	int salud = 100;
 	glm::mat4 modelMatrixJugador = glm::mat4(1.0f);
 	int indiceAnimacion = 1;
 	float rotacionY;

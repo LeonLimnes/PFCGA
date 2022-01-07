@@ -1,6 +1,7 @@
 #pragma once
 #include "Headers/Model.h"
 #include "Headers/Terrain.h"
+#include "Jugador.h"
 
 class NPC {
 public:
@@ -11,6 +12,7 @@ public:
 	// Variables
 	Model modelo, red;
 	std::string nombre;
+	int salud = 100;
 	glm::mat4 modelMatrixNPC = glm::mat4(1.0f), modelMatrixRed = glm::mat4(1.0f);
 	float escalaModelo = 0.02f, rotacionY, escalaRed = 1.5f;
 	float tiempoAtacando = 0.0f, tiempoMuriendo = 0.0f;
@@ -30,6 +32,12 @@ public:
 	void crearColisionadorAtaque(std::map<std::string,
 		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders);
 	void colisionAtaque(
+		Jugador *jugador,
+		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
+		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
+		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt
+	);
+	void triggerBala(int cantidadBalas, 
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt
