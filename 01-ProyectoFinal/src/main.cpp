@@ -105,7 +105,8 @@ Model modelCasa6;
 // Lamps
 Model modelLamp1;
 Model modelLamp2;
-Model modelLampPost2;
+// Trees
+Model modelTree;
 // Hierba
 Model modelGrass;
 // Fountain
@@ -166,7 +167,7 @@ std::vector<glm::vec3> lamp1Position = { glm::vec3(-53.51, 0, -20.70), glm::vec3
 		glm::vec3(-21.87, 0, -19.92)};
 std::vector<float> lamp1Orientation = { -17.0, -82.67, 23.70, -17.0, -82.67, 23.70, -17.0, -82.67, 23.70 };
 
-std::vector<glm::vec3> lamp2Position = { 
+std::vector<glm::vec3> treePosition = { 
 		glm::vec3(-24.21, 0, -66.79),
 		glm::vec3(-49.21, 0, -60.54),
 		glm::vec3(-72.65, 0, -19.53),
@@ -180,7 +181,7 @@ std::vector<glm::vec3> lamp2Position = {
 		glm::vec3(29.29, 0, -61.71),
 		glm::vec3(55.07, 0, -68.75)
 };
-std::vector<float> lamp2Orientation = {
+std::vector<float> treeOrientation = {
 	 21.37 + 90,
 	-65.0 + 90,
 	/*45.60 + 90,
@@ -553,8 +554,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelLamp2.loadModel("../models/Street_Light/Lamp.obj");
 	modelLamp2.setShader(&shaderMulLighting);
 
-	modelLampPost2.loadModel("../models/AcaciaTree/acaciaTree.obj");
-	modelLampPost2.setShader(&shaderMulLighting);
+	modelTree.loadModel("../models/AcaciaTree/acaciaTree.obj");
+	modelTree.setShader(&shaderMulLighting);
 	#pragma endregion
 
 	#pragma region Inicializacion pasto 3D
@@ -1166,7 +1167,7 @@ void destroy() {
 
 	modelLamp1.destroy();
 	modelLamp2.destroy();
-	modelLampPost2.destroy();
+	modelTree.destroy();
 	modelGrass.destroy();
 	modelFountain.destroy();
 	
@@ -1678,21 +1679,23 @@ void applicationLoop() {
 			lampCollider.e = modelLamp1.getObb().e * glm::vec3(0.08, 0.08, 0.08);
 			std::get<0>(collidersOBB.find("lamp1-" + std::to_string(i))->second) = lampCollider;
 		}
+		#pragma endregion
 
+		#pragma region Colisionadores arboles
 		// Lamps2 colliders
-		for (int i = 0; i < lamp2Position.size(); i++){
-			AbstractModel::OBB lampCollider;
-			glm::mat4 modelMatrixColliderLamp = glm::mat4(1.0);
-			modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp, lamp2Position[i]);
-			modelMatrixColliderLamp = glm::rotate(modelMatrixColliderLamp, glm::radians(lamp2Orientation[i]), glm::vec3(0, 1, 0));
-			addOrUpdateColliders(collidersOBB, "Arbol-" + std::to_string(i), lampCollider, modelMatrixColliderLamp);
+		for (int i = 0; i < treePosition.size(); i++){
+			AbstractModel::OBB treeCollider;
+			glm::mat4 modelMatrixColliderTree = glm::mat4(1.0);
+			modelMatrixColliderTree = glm::translate(modelMatrixColliderTree, treePosition[i]);
+			modelMatrixColliderTree = glm::rotate(modelMatrixColliderTree, glm::radians(treeOrientation[i]), glm::vec3(0, 1, 0));
+			addOrUpdateColliders(collidersOBB, "Arbol-" + std::to_string(i), treeCollider, modelMatrixColliderTree);
 			// Set the orientation of collider before doing the scale
-			lampCollider.u = glm::quat_cast(modelMatrixColliderLamp);
-			modelMatrixColliderLamp = glm::scale(modelMatrixColliderLamp, glm::vec3(0.0095, 0.018, 0.0055));
-			modelMatrixColliderLamp = glm::translate(modelMatrixColliderLamp, modelLampPost2.getObb().c);
-			lampCollider.c = glm::vec3(modelMatrixColliderLamp[3]);
-			lampCollider.e = modelLampPost2.getObb().e * glm::vec3(0.0095, 0.018, 0.0055);
-			std::get<0>(collidersOBB.find("Arbol-" + std::to_string(i))->second) = lampCollider;
+			treeCollider.u = glm::quat_cast(modelMatrixColliderTree);
+			modelMatrixColliderTree = glm::scale(modelMatrixColliderTree, glm::vec3(0.0095, 0.018, 0.0055));
+			modelMatrixColliderTree = glm::translate(modelMatrixColliderTree, modelTree.getObb().c);
+			treeCollider.c = glm::vec3(modelMatrixColliderTree[3]);
+			treeCollider.e = modelTree.getObb().e * glm::vec3(0.0095, 0.018, 0.0055);
+			std::get<0>(collidersOBB.find("Arbol-" + std::to_string(i))->second) = treeCollider;
 		}
 		#pragma endregion
 
@@ -1851,7 +1854,7 @@ void prepareScene(){
 	//Lamp models
 	modelLamp1.setShader(&shaderMulLighting);
 	modelLamp2.setShader(&shaderMulLighting);
-	modelLampPost2.setShader(&shaderMulLighting);
+	modelTree.setShader(&shaderMulLighting);
 
 	//Grass
 	modelGrass.setShader(&shaderMulLighting);
@@ -1880,7 +1883,9 @@ void prepareDepthScene(){
 	//Lamp models
 	modelLamp1.setShader(&shaderDepth);
 	modelLamp2.setShader(&shaderDepth);
-	modelLampPost2.setShader(&shaderDepth);
+	
+	// Tree
+	modelTree.setShader(&shaderDepth);
 
 	//Grass
 	modelGrass.setShader(&shaderDepth);
@@ -1967,13 +1972,15 @@ void renderScene(bool renderParticles){
 		modelLamp1.setOrientation(glm::vec3(0, lamp1Orientation[i], 0));
 		modelLamp1.render();
 	}
+	#pragma endregion
 
-	for (int i = 0; i < lamp2Position.size(); i++){
-		lamp2Position[i].y = terrain.getHeightTerrain(lamp2Position[i].x, lamp2Position[i].z);		
-		modelLampPost2.setPosition(lamp2Position[i]);
-		modelLampPost2.setScale(glm::vec3(0.06, 0.06, 0.06));
-		modelLampPost2.setOrientation(glm::vec3(0, lamp2Orientation[i], 0));
-		modelLampPost2.render();
+	#pragma region Renderizado arboles
+	for (int i = 0; i < treePosition.size(); i++){
+		treePosition[i].y = terrain.getHeightTerrain(treePosition[i].x, treePosition[i].z);		
+		modelTree.setPosition(treePosition[i]);
+		modelTree.setScale(glm::vec3(0.06, 0.06, 0.06));
+		modelTree.setOrientation(glm::vec3(0, treeOrientation[i], 0));
+		modelTree.render();
 	}
 	#pragma endregion
 
