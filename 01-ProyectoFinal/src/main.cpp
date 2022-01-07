@@ -1729,7 +1729,8 @@ void applicationLoop() {
 				if (it != jt && testOBBOBB(std::get<0>(it->second), std::get<0>(jt->second))) {
 					isCollision = true;
 
-					bobAnimate.colisionAtaque(&collidersOBB, it, jt);
+					bobAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);
+					bobAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
 
 					jugador.colisionesBalas(&collidersOBB, it, jt);
 				}

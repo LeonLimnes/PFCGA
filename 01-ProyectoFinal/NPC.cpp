@@ -82,6 +82,7 @@ void NPC::update(glm::mat4 modelMatrixJugador, Terrain *terreno,
 			if (tiempoAtacando >= 1.0f) {
 				tiempoAtacando = 0.0f;
 				estadoRed = 0; rotacionXRed = -60.0f;
+				colliders.erase(nombreAtaque);
 				atacando = false;
 				golpeando = false;
 			}
@@ -120,35 +121,61 @@ void NPC::update(glm::mat4 modelMatrixJugador, Terrain *terreno,
 			}
 		}
 
+		// El NPC ha muerto
+		if (salud <= 0 && !muriendo) {
+			salud = 0;
+			atacando = false;
+			tiempoAtacando = 0.0f;
+			modelo.runningTime = 0.0f;
+			colliders.erase(nombre);
+			muriendo = true;
+		}
+
+		if (muriendo) {
+			tiempoMuriendo += deltaTime/1.5f;
+			modelo.setAnimationIndex(3);
+
+			if (tiempoMuriendo >= 1.9f) {
+				tiempoMuriendo = 0.0f;
+				muriendo = false;
+				activo = false;
+			}
+		}
+
 		modelMatrixNPC[3][1] = terreno->getHeightTerrain(modelMatrixNPC[3][0], modelMatrixNPC[3][2]);
 		glm::mat4 modelMatrixNPCBody = glm::mat4(modelMatrixNPC);
 		modelo.render(modelMatrixNPCBody, deltaTime/2);
 		modelo.setAnimationIndex(0);	// NPC en reposo
 
-		// Renderiza la red que porta el npc
-		rotacionY = calcularRotacionY(anguloA, anguloB);
+		if (!muriendo) {
+			// Renderiza la red que porta el npc
+			rotacionY = calcularRotacionY(anguloA, anguloB);
 
-		modelMatrixRed[0] = glm::vec4(escalaRed * cos(glm::radians(rotacionY)), 0, escalaRed * -sin(glm::radians(rotacionY)), 0);
-		modelMatrixRed[2] = glm::vec4(escalaRed * sin(glm::radians(rotacionY)), 0, escalaRed * cos(glm::radians(rotacionY)), 0);
-		modelMatrixRed[3] = glm::vec4(modelMatrixNPC[3][0] - 0.5f*cos(glm::radians(rotacionY)), modelMatrixNPC[3][1] + 1.2f, modelMatrixNPC[3][2] + 0.5*sin(glm::radians(rotacionY)), 1);
-		glm::mat4 modelMatrixRedBody = modelMatrixRed;
-		modelMatrixRedBody = glm::rotate(modelMatrixRedBody, glm::radians(rotacionXRed), glm::vec3(1,0,0));
-		red.render(modelMatrixRedBody);
+			modelMatrixRed[0] = glm::vec4(escalaRed * cos(glm::radians(rotacionY)), 0, escalaRed * -sin(glm::radians(rotacionY)), 0);
+			modelMatrixRed[2] = glm::vec4(escalaRed * sin(glm::radians(rotacionY)), 0, escalaRed * cos(glm::radians(rotacionY)), 0);
+			modelMatrixRed[3] = glm::vec4(modelMatrixNPC[3][0] - 0.5f*cos(glm::radians(rotacionY)), modelMatrixNPC[3][1] + 1.2f, modelMatrixNPC[3][2] + 0.5*sin(glm::radians(rotacionY)), 1);
+			glm::mat4 modelMatrixRedBody = modelMatrixRed;
+			modelMatrixRedBody = glm::rotate(modelMatrixRedBody, glm::radians(rotacionXRed), glm::vec3(1,0,0));
+			red.render(modelMatrixRedBody);
+		}
 	}
 }
 
 void NPC::crearColisionador(std::map<std::string,
 	std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders) {
 
-	// Colisionador del NPC
-	glm::mat4 modelMatrixColliderNPC = glm::mat4(1.0);
-	// Set the orientation of collider before doing the scale
-	npcCollider.u = glm::quat_cast(modelMatrixColliderNPC);
-	modelMatrixColliderNPC = glm::scale(modelMatrixColliderNPC, glm::vec3(1.0, 1.0, 1.0));
-	modelMatrixColliderNPC = glm::translate(modelMatrixColliderNPC, glm::vec3(modelMatrixNPC[3]));
-	npcCollider.c = glm::vec3(modelMatrixColliderNPC[3]) + glm::vec3(0, 1.5f, 0);
-	npcCollider.e = modelo.getObb().e * glm::vec3(1.5, 2.0, 1.5);
-	addOrUpdateColliders(colliders, nombre, npcCollider, modelMatrixNPC);
+	if (activo && !muriendo) {
+		// Colisionador del NPC
+		glm::mat4 modelMatrixColliderNPC = glm::mat4(1.0);
+		// Set the orientation of collider before doing the scale
+		npcCollider.u = glm::quat_cast(modelMatrixColliderNPC);
+		modelMatrixColliderNPC = glm::scale(modelMatrixColliderNPC, glm::vec3(1.0, 1.0, 1.0));
+		modelMatrixColliderNPC = glm::translate(modelMatrixColliderNPC, glm::vec3(modelMatrixNPC[3]));
+		npcCollider.c = glm::vec3(modelMatrixColliderNPC[3]) + glm::vec3(0, 1.5f, 0);
+		npcCollider.e = modelo.getObb().e * glm::vec3(1.5, 2.0, 1.5);
+		addOrUpdateColliders(colliders, nombre, npcCollider, modelMatrixNPC);
+	}
+	
 }
 
 void NPC::crearColisionadorAtaque(std::map<std::string,
@@ -164,6 +191,7 @@ void NPC::crearColisionadorAtaque(std::map<std::string,
 }
 
 void NPC::colisionAtaque(
+	Jugador *jugador,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt) {
@@ -174,12 +202,32 @@ void NPC::colisionAtaque(
 		if (it->first.compare(nombreAtaque.c_str()) == 0) {
 
 			// Si hay trigger del ataque con el jugador, entonces hay daño
-			if (jt->first.compare("mayow") == 0) {
+			if (jt->first.compare(jugador->nombre) == 0) {
 				printf("Hay dano\n");
 			}
+
+			/*if (jt->first.compare("mayow") == 0) {
+				printf("Hay dano\n");
+			}*/
 		}
 	}
 	collidersOBB->erase(nombreAtaque);
+}
+
+void NPC::triggerBala(int cantidadBalas,
+	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
+	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
+	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt) {
+
+	if (it->first.compare(nombre.c_str()) == 0) {
+		for (int i = 0; i < cantidadBalas; i++) {
+
+			// Si una bala impacta al NPC, le hace daño
+			if (jt->first.compare("Bala-" + std::to_string(i)) == 0) {
+				salud -= 15;
+			}
+		}
+	}
 }
 
 float NPC::calcularRotacionY(float anguloA, float anguloB) {

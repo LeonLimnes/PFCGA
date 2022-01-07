@@ -45,10 +45,9 @@ void Bala::colisionBala(
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt
 ) {
-	// Detecta si la bala colisionó con otro objeto
-	if (it->first.compare(nombre.c_str()) == 0) {
-		std::cout << it->first << " colisiono con " << jt->first << std::endl;
-		collidersOBB->erase(it->first);
+	// Si la bala colisionó con otro objeto, la elimina
+	if (jt->first.compare(nombre.c_str()) == 0) {
+		collidersOBB->erase(jt->first);
 		tiempoVidaActual = 0.0f;
 		activa = false;
 	}
