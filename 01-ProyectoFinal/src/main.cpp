@@ -2102,11 +2102,11 @@ void renderScene(bool renderParticles){
 	#pragma region Renderizado de NPCs
 	// Gatos
 	bobAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	/*mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	rosieAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	oliviaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	kikiAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);*/
+	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	#pragma endregion
 
 	/**********
