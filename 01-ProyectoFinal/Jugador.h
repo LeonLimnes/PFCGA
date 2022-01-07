@@ -20,6 +20,7 @@ public:
 	float rotacionY;
 	Bala balas[10];
 	int cantidadBalas = 10;
+	bool activo = true;
 
 	// Funciones
 	void start(std::string nombre, glm::vec3 posInicial, float rotInicial);
@@ -39,4 +40,8 @@ public:
 	);
 	void destroy();
 
+private:
+	// Variables
+	bool disparando = false;
+	float tiempoDisparando = 0.0f;
 };

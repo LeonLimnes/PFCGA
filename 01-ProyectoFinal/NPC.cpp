@@ -36,36 +36,39 @@ void NPC::destroy() {
 	red.destroy();
 }
 
-void NPC::update(glm::mat4 modelMatrixJugador, Terrain *terreno, 
+void NPC::update(Jugador *jugador, Terrain *terreno,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime) {
 
 	if (activo == true) {
 		// El NPC mira hacia la cámara en todo momento
-		glm::vec3 jdrPos = modelMatrixJugador[3];
+		glm::vec3 jdrPos = jugador->modelMatrixJugador[3];
 		glm::vec3 npcPos = modelMatrixNPC[3];
 
 		// Distancia entre el NPC y el jugador
 		distancia = glm::distance(npcPos, jdrPos);
 
-		if (distancia <= 1.8f && !atacando) {
-			modelo.runningTime = 0.0f;
-			distancia = 1.5f;
-			atacando = true;
-		}
-		else if (distancia <= 12.0f && !atacando && !muriendo) {
-			a = jdrPos.z - npcPos.z;
-			b = jdrPos.x - npcPos.x;
-			h = sqrt(a*a + b * b);
-			anguloA = asin(b / h);
-			anguloB = asin(a / h);
+		// Persigue y ataca al jugador solo cuando este sigue "vivo"
+		if (jugador->activo) {
+			if (distancia <= 1.8f && !atacando) {
+				modelo.runningTime = 0.0f;
+				distancia = 1.5f;
+				atacando = true;
+			}
+			else if (distancia <= 17.0f && !atacando && !muriendo) {
+				a = jdrPos.z - npcPos.z;
+				b = jdrPos.x - npcPos.x;
+				h = sqrt(a*a + b * b);
+				anguloA = asin(b / h);
+				anguloB = asin(a / h);
 
-			// Rotación del NPC
-			modelMatrixNPC[0] = glm::vec4(0.02 * sin(anguloB), 0, 0.02 * sin(-anguloA), 0);
-			modelMatrixNPC[2] = glm::vec4(0.02 * -sin(-anguloA), 0, 0.02 * sin(anguloB), 0);
+				// Rotación del NPC
+				modelMatrixNPC[0] = glm::vec4(0.02 * sin(anguloB), 0, 0.02 * sin(-anguloA), 0);
+				modelMatrixNPC[2] = glm::vec4(0.02 * -sin(-anguloA), 0, 0.02 * sin(anguloB), 0);
 
-			// El NPC corre hacia el jugador
-			modelMatrixNPC = glm::translate(modelMatrixNPC, glm::vec3(0.0f, 0.0f, 2.0f));
-			modelo.setAnimationIndex(1);
+				// El NPC corre hacia el jugador
+				modelMatrixNPC = glm::translate(modelMatrixNPC, glm::vec3(0.0f, 0.0f, 2.0f));
+				modelo.setAnimationIndex(1);
+			}
 		}
 
 		// El NPC está atacando al jugador
@@ -148,7 +151,7 @@ void NPC::update(glm::mat4 modelMatrixJugador, Terrain *terreno,
 		modelo.setAnimationIndex(0);	// NPC en reposo
 
 		if (!muriendo) {
-			// Renderiza la red que porta el npc
+			// Renderiza la red que porta el NPC
 			rotacionY = calcularRotacionY(anguloA, anguloB);
 
 			modelMatrixRed[0] = glm::vec4(escalaRed * cos(glm::radians(rotacionY)), 0, escalaRed * -sin(glm::radians(rotacionY)), 0);
@@ -203,15 +206,12 @@ void NPC::colisionAtaque(
 
 			// Si hay trigger del ataque con el jugador, entonces hay daño
 			if (jt->first.compare(jugador->nombre) == 0) {
-				printf("Hay dano\n");
+				jugador->salud -= 5.0f;
+				printf("Vida restante: %d\n", jugador->salud);
+				collidersOBB->erase(nombreAtaque);
 			}
-
-			/*if (jt->first.compare("mayow") == 0) {
-				printf("Hay dano\n");
-			}*/
 		}
 	}
-	collidersOBB->erase(nombreAtaque);
 }
 
 void NPC::triggerBala(int cantidadBalas,

@@ -8,7 +8,22 @@ ThirdPersonCamera::ThirdPersonCamera(){
     distanceFromTarget = 1.0f;
     sensitivity = SENSITIVTY;
     worldUp = glm::vec3(0.0, 1.0, 0.0);
+	minPitch = -M_PI / 2;
+	maxPitch = M_PI / 2;
     updateCamera();
+}
+
+ThirdPersonCamera::ThirdPersonCamera(float sensibilidad, float minPitch, float maxPitch) {
+	pitch = glm::radians(20.0f);
+	yaw = 0.0f;
+	angleAroundTarget = 0.0f;
+	angleTarget = 0.0;
+	distanceFromTarget = 1.0f;
+	sensitivity = sensibilidad;
+	worldUp = glm::vec3(0.0, 1.0, 0.0);
+	this->minPitch = glm::radians(minPitch);
+	this->maxPitch = glm::radians(maxPitch);
+	updateCamera();
 }
 
 void ThirdPersonCamera::mouseMoveCamera(float xoffset, float yoffset, float dt){
@@ -19,10 +34,19 @@ void ThirdPersonCamera::mouseMoveCamera(float xoffset, float yoffset, float dt){
     pitch += yoffset * cameraSpeed;
     // Calculate Angle Arround
     angleAroundTarget -= xoffset * cameraSpeed;
-    if(pitch > M_PI / 2)
+
+	// Clamp del ángulo pitch
+	if (pitch > maxPitch) {
+		pitch = maxPitch - 0.01;
+	}
+	if (pitch < minPitch) {
+		pitch = minPitch + 0.01;
+	}
+
+    /*if(pitch > M_PI / 2)
         pitch = M_PI / 2 - 0.01;
     if(pitch < -M_PI / 2)
-        pitch = -M_PI / 2 + 0.01;
+        pitch = -M_PI / 2 + 0.01;*/
     updateCamera();
 }
 

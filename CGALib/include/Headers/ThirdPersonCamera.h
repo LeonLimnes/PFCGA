@@ -32,9 +32,13 @@ class DLL_PUBLIC ThirdPersonCamera: public Camera
 {
 public:
     ThirdPersonCamera();
+	ThirdPersonCamera(float sensibilidad, float minPitch, float maxPitch);
     void mouseMoveCamera(float xoffset, float yoffset, float dt);
     void scrollMoveCamera(float soffset, float dt);
     void updateCamera();
+
+private:
+	float minPitch, maxPitch;
 };
 
 #endif // THIRDPERSONCAMERA_H

@@ -82,7 +82,7 @@ Shader shaderViewDepth;
 //Shader para dibujar el buffer de profunidad
 Shader shaderDepth;
 
-std::shared_ptr<Camera> camera(new ThirdPersonCamera());
+std::shared_ptr<Camera> camera(new ThirdPersonCamera(15.0f, -15.0f, 65.0f));
 float distanceFromTarget = 7.0;
 
 Sphere skyboxSphere(20, 20);
@@ -114,7 +114,6 @@ Model modelGrass;
 Model modelFountain;
 
 // Modelos animados
-Model bartmanModelAnimate;		// Bart
 Model modelHazmat;				// Hazmat		
 Jugador jugador;				// Mayow
 NPC bobAnimate;					// Bob
@@ -157,7 +156,6 @@ glm::mat4 modelMatrixCasa5 = glm::mat4(1.0);
 glm::mat4 modelMatrixCasa6 = glm::mat4(1.0);
 
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);	// Fuente de agua
-glm::mat4 modelMatrixBartman = glm::mat4(1.0f);		// Bart (jugador)
 glm::mat4 modelMatrixHazmat = glm::mat4(1.0f);		// hazmat
 
 // Lamps positions
@@ -1182,7 +1180,6 @@ void destroy() {
 	modelGrass.destroy();
 	modelFountain.destroy();
 	
-	bartmanModelAnimate.destroy();	// bartman
 	modelHazmat.destroy();			// hazmat
 
 	// Custom objects animate
@@ -1252,8 +1249,8 @@ void mouseCallback(GLFWwindow *window, double xpos, double ypos) {
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset){
 	distanceFromTarget -= yoffset;
 
-	if (distanceFromTarget <= 1.5f) {
-		distanceFromTarget = 1.5f;
+	if (distanceFromTarget <= 3.5f) {
+		distanceFromTarget = 3.5f;
 	}
 	else if (distanceFromTarget >= 10.0f) {
 		distanceFromTarget = 10.0f;
@@ -1286,7 +1283,7 @@ bool processInput(bool continueApplication) {
 	camera->mouseMoveCamera(0.0, 0.5f * offsetY, deltaTime);
 	offsetX = 0; offsetY = 0;
 
-	#pragma region Movimientos de Mayow
+	#pragma region Movimientos del Jugador
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
 		jugador.moverX(camera, 0.2f);
 	}else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
@@ -1334,9 +1331,6 @@ void applicationLoop() {
 	modelMatrixCasa6 = glm::translate(modelMatrixCasa6, glm::vec3(-60.93, 0.0, -38.28));
 	modelMatrixCasa6 = glm::scale(modelMatrixCasa6, glm::vec3(0.1f, 0.1f, 0.1f));
 
-	// Mayow
-	jugador.start("mayow", glm::vec3(13.0f, 0.05f, -9.0f), -90.0f);
-
 	// Fuente de agua
 	modelMatrixFountain = glm::translate(modelMatrixFountain, glm::vec3(-0.6, 0.0, -4.5));
 	modelMatrixFountain[3][1] = terrain.getHeightTerrain(modelMatrixFountain[3][0] , modelMatrixFountain[3][2]); //+ 0.2
@@ -1346,12 +1340,10 @@ void applicationLoop() {
 	modelMatrixHazmat = glm::translate(modelMatrixHazmat, glm::vec3(0.0, 0.0, 0.0));
 	modelMatrixHazmat = glm::scale(modelMatrixFountain, glm::vec3(0.009f, 0.009f, 0.009f));
 
-	// Bart
-	modelMatrixBartman = glm::translate(modelMatrixBartman, glm::vec3(20.25f, 0.0f, -8.89f));
-	modelMatrixBartman = glm::rotate(modelMatrixBartman, glm::radians(-45.0f), glm::vec3(0, 1, 0));
-	modelMatrixBartman = glm::scale(modelMatrixBartman, glm::vec3(5.0f, 5.0f, 5.0f));
+	// Bart (jugador)
+	jugador.start("Bart", glm::vec3(13.0f, 0.05f, -9.0f), -90.0f);
 
-	// NPCs
+	// NPCs (enemigos)
 	bobAnimate.start("NPC-Bob", glm::vec3(0, 0, 20), 0.0f);
 	#pragma endregion
 
@@ -1388,7 +1380,7 @@ void applicationLoop() {
 		#pragma region Camara Tercera Persona
 		axis = glm::axis(glm::quat_cast(jugador.modelMatrixJugador));
 		angleTarget = glm::angle(glm::quat_cast(jugador.modelMatrixJugador));
-		target = jugador.modelMatrixJugador[3];
+		target = jugador.modelMatrixJugador[3] + glm::vec4(0, 2.2f, 0, 0);
 
 		if(std::isnan(angleTarget))
 			angleTarget = 0.0;
@@ -1714,8 +1706,8 @@ void applicationLoop() {
 		}
 		#pragma endregion
 
-		#pragma region Colisionador Mayow
-		// Collider de mayow
+		#pragma region Colisionador Jugador
+		// Collider del jugador
 		jugador.crearColisionador(collidersOBB);
 		#pragma endregion
 
@@ -1804,8 +1796,11 @@ void applicationLoop() {
 				if (!colIt->second)
 					addOrUpdateColliders(collidersOBB, jt->first);
 				else {
+					// Verifica que el jugador y NPCs no atraviesen otros objetos
 					if (jt->first.compare(jugador.nombre) == 0)
 						jugador.modelMatrixJugador = std::get<1>(jt->second);
+					else if (jt->first.compare(bobAnimate.nombre) == 0)
+						bobAnimate.modelMatrixNPC = std::get<1>(jt->second);
 				}
 			}
 		}
@@ -2000,15 +1995,6 @@ void renderScene(bool renderParticles){
 	}
 	#pragma endregion
 
-	#pragma region Renderizado de Bart
-	// Bart
-	modelMatrixBartman[3][1] = terrain.getHeightTerrain(modelMatrixBartman[3][0], modelMatrixBartman[3][2]);
-	glm::mat4 modelMatrixBartmanBody = glm::mat4(modelMatrixBartman);
-	modelMatrixBartmanBody = glm::scale(modelMatrixBartmanBody, glm::vec3(0.021, 0.021, 0.021));
-	bartmanModelAnimate.setAnimationIndex(0);
-	bartmanModelAnimate.render(modelMatrixBartmanBody);
-	#pragma endregion
-
 	#pragma region Renderizado del pasto 3D
 	// Grass
 	glDisable(GL_CULL_FACE);
@@ -2029,12 +2015,12 @@ void renderScene(bool renderParticles){
 	/*******************************************
 	 * Custom Anim objects obj
 	 *******************************************/
-	#pragma region Renderizado de Mayow
+	#pragma region Renderizado de Bart
 	jugador.update(collidersOBB, &terrain, deltaTime);
 	#pragma endregion
 
 	#pragma region Renderizado de NPCs
-	bobAnimate.update(jugador.modelMatrixJugador, &terrain, collidersOBB, deltaTime);
+	bobAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
 	#pragma endregion
 
 	/**********

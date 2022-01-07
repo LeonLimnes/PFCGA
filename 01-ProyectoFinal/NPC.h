@@ -23,7 +23,7 @@ public:
 
 	// Funciones
 	void start(std::string nombre, glm::vec3 posInicial, float rotInicial);
-	void update(glm::mat4 modelMatrixJugador, Terrain *terreno, 
+	void update(Jugador *jugador, Terrain *terreno,
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime);
 	void cargarModelo(const std::string & path, Shader *shader_ptr);
 	void setShader(Shader *shader_ptr);
