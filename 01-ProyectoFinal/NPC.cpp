@@ -39,7 +39,7 @@ void NPC::destroy() {
 }
 
 void NPC::update(Jugador *jugador, Terrain *terreno,
-	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime, bool &activandoNPC, int &idNPC) {
+	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime, bool &activandoNPC, int &idNPC, int estadoPrograma) {
 
 	if (activo == true) {
 		// El NPC mira hacia la cámara en todo momento
@@ -49,8 +49,8 @@ void NPC::update(Jugador *jugador, Terrain *terreno,
 		// Distancia entre el NPC y el jugador
 		distancia = glm::distance(npcPos, jdrPos);
 
-		// Persigue y ataca al jugador solo cuando este sigue "vivo"
-		if (jugador->activo) {
+		// Persigue y ataca al jugador solo cuando este sigue "vivo" y se juega una pertida
+		if (jugador->activo && estadoPrograma == 2) {
 			if (distancia <= 1.8f && !atacando) {
 				modelo.runningTime = 0.0f;
 				distancia = 1.5f;

@@ -21,7 +21,7 @@ void Jugador::cargarModelo(const std::string & path, Shader *shader_ptr) {
 }
 
 void Jugador::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders,
-	Terrain *terreno, float deltaTime) {
+	Terrain *terreno, float deltaTime, int &estadoPrograma) {
 
 	if (activo) {
 		// Animación de disparo
@@ -56,6 +56,7 @@ void Jugador::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::m
 		if (tiempoMuriendo >= 4.3f) {
 			tiempoMuriendo = 0.0f;
 			muriendo = false;
+			estadoPrograma = 3;
 			muerto = true;
 		}
 	}

@@ -20,12 +20,12 @@ public:
 	float rotacionY;
 	Bala balas[10];
 	int cantidadBalas = 10;
-	bool activo = true, disparando = false;
+	bool activo = true, disparando = false, muerto = false;
 
 	// Funciones
 	void start(std::string nombre, glm::vec3 posInicial, float rotInicial);
 	void update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders,
-		Terrain *terreno, float deltaTime);
+		Terrain *terreno, float deltaTime, int &estadoPrograma);
 	void cargarModelo(const std::string & path, Shader *shader_ptr);
 	void setShader(Shader *shader_ptr);
 	void moverX(std::shared_ptr<Camera> camera, float cantidad);
@@ -42,6 +42,6 @@ public:
 
 private:
 	// Variables
-	bool muriendo = false, muerto = false;
+	bool muriendo = false;
 	float tiempoDisparando = 0.0f, tiempoMuriendo = 0.0f;
 };
