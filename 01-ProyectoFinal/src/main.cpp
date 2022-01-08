@@ -46,6 +46,9 @@
 // Include Colision headers functions
 #include "Headers/Colisiones.h"
 
+// Font Rendering
+#include "Headers/FontTypeRendering.h";
+
 // Shadowbox include 
 #include "Headers/ShadowBox.h"
 
@@ -96,6 +99,7 @@ Box boxLightViewBox;
 
 ShadowBox *shadowBox;
 ImagenUI imagenUI, imagenUI2;
+FontTypeRendering::FontTypeRendering *modelText;
 
 // Models complex instances
 Model modelAircraft;
@@ -1110,6 +1114,12 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	#pragma endregion
 
 	/*******************************************
+	 * Inicialización de Texto en pantalla
+	 *******************************************/
+	modelText = new FontTypeRendering::FontTypeRendering(screenWidth, screenHeight);
+	modelText->Initialize();
+
+	/*******************************************
 	 * OpenAL init
 	 *******************************************/
 	#pragma region Inicializacion de audios
@@ -1987,6 +1997,13 @@ void applicationLoop() {
 		projection = glm::ortho(0.0f, 800.0f, 700.0f, 0.0f, -1.0f, 1.0f);
 		imagenUI.render(glm::vec2(0, 0), glm::vec2(100, 100), 0.0f, glm::vec3(1, 1, 1), projection);
 		imagenUI2.render(glm::vec2(200, 0), glm::vec2(100, 100), 0.0f, glm::vec3(1, 1, 1), projection);
+		#pragma endregion
+
+		#pragma region Renderizado de texto UI
+		glEnable(GL_BLEND);
+		modelText->render("Hola con texto", -0.2, 0.9, 20, 1.0, 1.0, 0.0);
+		modelText->render("Un contador con text rendering", -0.5, -0.9, 30, 0.5, 0.3, 0.6);
+		glDisable(GL_BLEND);
 		#pragma endregion
 
 		glfwSwapBuffers(window);
