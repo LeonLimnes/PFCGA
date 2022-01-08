@@ -55,6 +55,7 @@
 // Archivos de cabecera adicionales
 #include "../../01-ProyectoFinal/NPC.h"
 #include "../../01-ProyectoFinal/Jugador.h"
+#include "../../01-ProyectoFinal/ImagenUI.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -81,6 +82,8 @@ Shader shaderParticlesFire2;
 Shader shaderViewDepth;
 //Shader para dibujar el buffer de profunidad
 Shader shaderDepth;
+//Shader para imágenes UI
+Shader shaderUI;
 
 std::shared_ptr<Camera> camera(new ThirdPersonCamera(15.0f, -15.0f, 65.0f));
 float distanceFromTarget = 7.0;
@@ -92,6 +95,7 @@ Box boxViewDepth;
 Box boxLightViewBox;
 
 ShadowBox *shadowBox;
+ImagenUI imagenUI, imagenUI2;
 
 // Models complex instances
 Model modelAircraft;
@@ -490,7 +494,13 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shaderParticlesFire2.initialize("../Shaders/particlesSmoke.vs", "../Shaders/particlesSmoke.fs", { "Position", "Velocity", "Age" });
 	shaderViewDepth.initialize("../Shaders/texturizado.vs", "../Shaders/texturizado_depth_view.fs");
 	shaderDepth.initialize("../Shaders/shadow_mapping_depth.vs", "../Shaders/shadow_mapping_depth.fs");
+	shaderUI.initialize("../Shaders/imagenUI.vs", "../Shaders/imagenUI.fs");
 	#pragma endregion
+
+	#pragma region Shader para imagenes UI
+	imagenUI.shader = shaderUI;
+	imagenUI2.shader = shaderUI;
+	#pragma endregion	
 
 	#pragma region Inicializacion otros objetos 3D
 	// Inicializacion de los objetos.
@@ -1038,6 +1048,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	shaderParticlesFire2.setMatrix3("EmitterBasis", 1, false, glm::value_ptr(basis));
 	#pragma endregion
 
+	#pragma region Inicializacion de imagenes UI
+	imagenUI.inicializar("../Textures/cesped.jpg", imageWidth, imageHeight, bitmap, data);
+	imagenUI2.inicializar("../Textures/highway.jpg", imageWidth, imageHeight, bitmap, data);
+	#pragma endregion
+
 	/*******************************************
 	 * Inicializacion de los buffers de la fuente
 	 *******************************************/
@@ -1211,6 +1226,8 @@ void destroy() {
 	glDeleteTextures(1, &textureTerrainBlendMapID);
 	glDeleteTextures(1, &textureParticleFountainID);
 	glDeleteTextures(1, &textureParticleFireID);
+	imagenUI.destroy();
+	imagenUI2.destroy();
 
 	// Cube Maps Delete
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -1850,6 +1867,12 @@ void applicationLoop() {
 
 		// Constantes de animaciones
 		jugador.indiceAnimacion = 1;
+
+		#pragma region Renderizado de imagenes UI
+		projection = glm::ortho(0.0f, 800.0f, 700.0f, 0.0f, -1.0f, 1.0f);
+		imagenUI.render(glm::vec2(0, 0), glm::vec2(100, 100), 0.0f, glm::vec3(1, 1, 1), projection);
+		imagenUI2.render(glm::vec2(200, 0), glm::vec2(100, 100), 0.0f, glm::vec3(1, 1, 1), projection);
+		#pragma endregion
 
 		glfwSwapBuffers(window);
 
