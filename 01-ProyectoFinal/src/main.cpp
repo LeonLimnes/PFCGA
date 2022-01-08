@@ -121,6 +121,11 @@ Model modelFountain;
 Model modelHazmat;				// Hazmat		
 Jugador jugador;				// Mayow
 NPC bobAnimate, mitziAnimate, rosieAnimate, oliviaAnimate, kikiAnimate, tangyAnimate;
+NPC billyAnimate, nanAnimate, chevreAnimate, gruffAnimate, velmaAnimate;
+
+// Variables para activar otro NPC en tiempo de ejecución
+bool activandoNPC = false;
+int idNPC = 0;
 
 // Terrain model instance
 Terrain terrain(-1, -1, 200, 16, "../Textures/AlturasMapa.png");
@@ -210,7 +215,6 @@ std::vector<glm::vec3> grassPosition = {
 		glm::vec3(55.07, 1.0, -68.75),
 		glm::vec3(0.07, 1.0, -2.75),
 };
-
 
 // Blending model unsorted
 std::map<std::string, glm::vec3> blendingUnsorted = {
@@ -613,7 +617,6 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	kikiAnimate.cargarModelo("../models/AnimalCrossing/Cats/Kiki.fbx", &shaderMulLighting);		// Kiki
 	tangyAnimate.cargarModelo("../models/AnimalCrossing/Cats/Tangy.fbx", &shaderMulLighting);	// Tangy
 	#pragma endregion
-
 
 	// Modelos de casas
 	//AccumulaTownHouse/Accumula Town House.obj"
@@ -1230,6 +1233,11 @@ void destroy() {
 	oliviaAnimate.destroy();
 	kikiAnimate.destroy();
 	tangyAnimate.destroy();
+	billyAnimate.destroy();
+	nanAnimate.destroy();
+	chevreAnimate.destroy();
+	gruffAnimate.destroy();
+	velmaAnimate.destroy();
 
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -1311,9 +1319,13 @@ void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_RIGHT:
 			break;
+
 		case GLFW_MOUSE_BUTTON_LEFT:
-			jugador.disparar(camera);
+			if (!jugador.disparando) {
+				jugador.disparar(camera);
+			}
 			break;
+
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			break;
 		}
@@ -1325,12 +1337,60 @@ bool processInput(bool continueApplication) {
 		return false;
 	}
 	
+	#pragma region Controles Mando Xbox
+	// Control de Xbox One
+	if (glfwJoystickPresent(GLFW_JOYSTICK_1) == GL_TRUE) {
+		int axesCount, buttonCount;
+
+		const float * axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axesCount);
+		const unsigned char * buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttonCount);
+
+		// Movimiento del jugador
+		if (fabs(axes[1]) > 0.2f) {
+			jugador.moverZ(camera, axes[1] * 0.22f);
+		}
+		if (fabs(axes[0]) > 0.2f) {
+			jugador.moverX(camera, axes[0] * -0.22f);
+		}
+
+		// Movimiento de la cámara
+		if (fabs(axes[2]) > 0.2f) {
+			camera->mouseMoveCamera(2.5f * axes[2], 0.0, deltaTime);
+		}
+		if (fabs(axes[3]) > 0.2f) {
+			camera->mouseMoveCamera(0.0, -2.5f * axes[3], deltaTime);
+		}
+
+		// Disparar (Gatillo derecho)
+		if (axes[5] > 0.4f && !jugador.disparando) {
+			jugador.disparar(camera);
+		}
+
+		// Acercar cámara (Botón RB)
+		if (buttons[5] == GLFW_PRESS) {
+			distanceFromTarget -= 0.3f;
+		}
+		// Alejar cámara (Botón LB)
+		else if (buttons[4] == GLFW_PRESS) {
+			distanceFromTarget += 0.3f;
+		}
+		
+		if (distanceFromTarget <= 3.5f) {
+			distanceFromTarget = 3.5f;
+		}
+		else if (distanceFromTarget >= 10.0f) {
+			distanceFromTarget = 10.0f;
+		}
+		camera->setDistanceFromTarget(distanceFromTarget);
+	}
+	#pragma endregion
+
+	#pragma region Controles Teclado
 	// Mueve la cámara sin necesidad de presionar los botones
 	camera->mouseMoveCamera(0.5f * offsetX, 0.0, deltaTime);
 	camera->mouseMoveCamera(0.0, 0.5f * offsetY, deltaTime);
 	offsetX = 0; offsetY = 0;
 
-	#pragma region Movimientos del Jugador
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
 		jugador.moverX(camera, 0.2f);
 	}else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
@@ -1391,12 +1451,18 @@ void applicationLoop() {
 	jugador.start("Bart", glm::vec3(13.0f, 0.05f, -9.0f), -90.0f);
 
 	// NPCs (enemigos)
-	bobAnimate.start("NPC-Bob", glm::vec3(0, 0, 20), 0.0f);
-	mitziAnimate.start("NPC-Mitzi", glm::vec3(13.5, 0, 40), 0.0f);
-	rosieAnimate.start("NPC-Rosie", glm::vec3(-8, 0, 10), 0.0f);
-	oliviaAnimate.start("NPC-Olivia", glm::vec3(-25, 0, 20), 0.0f);
-	kikiAnimate.start("NPC-Kiki", glm::vec3(-25, 0, -20), 0.0f);
-	tangyAnimate.start("NPC-Tangy", glm::vec3(70, 0, 50), 0.0f);
+	bobAnimate.start("NPC-Bob", glm::vec3(0, 0, 20), 0.0f, true);
+	mitziAnimate.start("NPC-Mitzi", glm::vec3(13.5, 0, 40), 0.0f, true);
+	rosieAnimate.start("NPC-Rosie", glm::vec3(-8, 0, 10), 0.0f, true);
+	oliviaAnimate.start("NPC-Olivia", glm::vec3(-25, 0, 20), 0.0f, true);
+	kikiAnimate.start("NPC-Kiki", glm::vec3(-25, 0, -20), 0.0f, true);
+	tangyAnimate.start("NPC-Tangy", glm::vec3(70, 0, 50), 0.0f, true);
+
+	billyAnimate.start("NPC-Billy", glm::vec3(13, 0, 15), 0.0f, false);
+	nanAnimate.start("NPC-Nan", glm::vec3(-13, 0, 5), 0.0f, false);
+	chevreAnimate.start("NPC-Chevre", glm::vec3(-70, 0, 0), 0.0f, false);
+	gruffAnimate.start("NPC-Gruff", glm::vec3(-50, 0, -35), 0.0f, false);
+	velmaAnimate.start("NPC-Velma", glm::vec3(-40, 0, -50), 0.0f, false);
 	#pragma endregion
 
 	lastTime = TimeManager::Instance().GetTime();
@@ -1634,6 +1700,12 @@ void applicationLoop() {
 		oliviaAnimate.crearColisionador(collidersOBB);
 		kikiAnimate.crearColisionador(collidersOBB);
 		tangyAnimate.crearColisionador(collidersOBB);
+
+		billyAnimate.crearColisionador(collidersOBB);
+		nanAnimate.crearColisionador(collidersOBB);
+		chevreAnimate.crearColisionador(collidersOBB);
+		gruffAnimate.crearColisionador(collidersOBB);
+		velmaAnimate.crearColisionador(collidersOBB);
 		#pragma endregion
 
 		#pragma region Colisionador Fuente
@@ -1807,13 +1879,21 @@ void applicationLoop() {
 				if (it != jt && testOBBOBB(std::get<0>(it->second), std::get<0>(jt->second))) {
 					isCollision = true;
 
+					// Colisiones para los NPCs
 					bobAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);		bobAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
 					mitziAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	mitziAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
 					rosieAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	rosieAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
 					oliviaAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	oliviaAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
 					kikiAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	kikiAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
 					tangyAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	tangyAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					
+					billyAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	billyAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					nanAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);		nanAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					chevreAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	chevreAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					gruffAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	gruffAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					velmaAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	velmaAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
 
+					// Colisiones para las balas del jugador
 					jugador.colisionesBalas(&collidersOBB, it, jt);
 				}
 			}
@@ -1878,6 +1958,22 @@ void applicationLoop() {
 					}
 					else if (jt->first.compare(tangyAnimate.nombre) == 0) {
 						tangyAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+
+					else if (jt->first.compare(billyAnimate.nombre) == 0) {
+						billyAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(nanAnimate.nombre) == 0) {
+						nanAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(chevreAnimate.nombre) == 0) {
+						chevreAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(gruffAnimate.nombre) == 0) {
+						gruffAnimate.modelMatrixNPC = std::get<1>(jt->second);
+					}
+					else if (jt->first.compare(velmaAnimate.nombre) == 0) {
+						velmaAnimate.modelMatrixNPC = std::get<1>(jt->second);
 					}
 				}
 			}
@@ -1967,6 +2063,12 @@ void prepareScene(){
 	oliviaAnimate.setShader(&shaderMulLighting);
 	kikiAnimate.setShader(&shaderMulLighting);
 	tangyAnimate.setShader(&shaderMulLighting);
+
+	billyAnimate.setShader(&shaderMulLighting);
+	nanAnimate.setShader(&shaderMulLighting);
+	chevreAnimate.setShader(&shaderMulLighting);
+	gruffAnimate.setShader(&shaderMulLighting);
+	velmaAnimate.setShader(&shaderMulLighting);
 }
 
 void prepareDepthScene(){
@@ -2006,6 +2108,12 @@ void prepareDepthScene(){
 	oliviaAnimate.setShader(&shaderDepth);
 	kikiAnimate.setShader(&shaderDepth);
 	tangyAnimate.setShader(&shaderDepth);
+
+	/*billyAnimate.setShader(&shaderDepth);
+	nanAnimate.setShader(&shaderDepth);
+	chevreAnimate.setShader(&shaderDepth);
+	gruffAnimate.setShader(&shaderDepth);
+	velmaAnimate.setShader(&shaderDepth);*/
 }
 
 void renderScene(bool renderParticles){
@@ -2124,12 +2232,54 @@ void renderScene(bool renderParticles){
 
 	#pragma region Renderizado de NPCs
 	// Gatos
-	bobAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	rosieAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	oliviaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	kikiAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
-	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime);
+	bobAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	rosieAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	oliviaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	kikiAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+
+	// Cabras
+	billyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	nanAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	chevreAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	gruffAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+	velmaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC);
+
+	// Cuando un NPC muere, otro tomará su lugar
+	if (activandoNPC == true) {
+		switch (idNPC) {
+		case 0:
+			billyAnimate.cargarModelo("../models/AnimalCrossing/Goats/Billy.fbx", &shaderMulLighting);		// Billy
+			billyAnimate.activo = true;
+			break;
+
+		case 1:
+			nanAnimate.cargarModelo("../models/AnimalCrossing/Goats/Nan.fbx", &shaderMulLighting);			// Nan
+			nanAnimate.activo = true;
+			break;
+
+		case 2:
+			chevreAnimate.cargarModelo("../models/AnimalCrossing/Goats/Chevre.fbx", &shaderMulLighting);	// Chevre
+			chevreAnimate.activo = true;
+			break;
+
+		case 3:
+			gruffAnimate.cargarModelo("../models/AnimalCrossing/Goats/Gruff.fbx", &shaderMulLighting);		// Gruff
+			gruffAnimate.activo = true;
+			break;
+
+		case 4:
+			velmaAnimate.cargarModelo("../models/AnimalCrossing/Goats/Velma.fbx", &shaderMulLighting);		// Velma
+			velmaAnimate.activo = true;
+			break;
+
+		default:
+			break;
+		}
+
+		activandoNPC = false;
+	}
 	#pragma endregion
 
 	/**********

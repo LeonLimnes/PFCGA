@@ -3,7 +3,7 @@ extern void addOrUpdateColliders(std::map<std::string,
 	std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders,
 	std::string name, AbstractModel::OBB collider, glm::mat4 transform);
 
-void NPC::start(std::string nombre, glm::vec3 posInicial, float rotInicial) {
+void NPC::start(std::string nombre, glm::vec3 posInicial, float rotInicial, bool activo) {
 	this->nombre = nombre;
 	nombreAtaque = nombre + "-Ataque";
 	modelMatrixNPC = glm::translate(modelMatrixNPC, posInicial);
@@ -16,6 +16,8 @@ void NPC::start(std::string nombre, glm::vec3 posInicial, float rotInicial) {
 
 	anguloA = sin(glm::radians(rotInicial));
 	anguloB = cos(glm::radians(rotInicial));
+
+	this->activo = activo;
 }
 
 void NPC::cargarModelo(const std::string & path, Shader *shader_ptr) {
@@ -37,7 +39,7 @@ void NPC::destroy() {
 }
 
 void NPC::update(Jugador *jugador, Terrain *terreno,
-	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime) {
+	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime, bool &activandoNPC, int &idNPC) {
 
 	if (activo == true) {
 		// El NPC mira hacia la cámara en todo momento
@@ -141,6 +143,11 @@ void NPC::update(Jugador *jugador, Terrain *terreno,
 			if (tiempoMuriendo >= 1.9f) {
 				tiempoMuriendo = 0.0f;
 				muriendo = false;
+
+				// Si este NPC muere, otro ocupará su lugar (estrategia para optimización de FPS)
+				idNPC = jugador->puntuacion;
+				activandoNPC = true;
+				jugador->puntuacion++;
 				activo = false;
 			}
 		}

@@ -14,13 +14,13 @@ public:
 	// Variables
 	Model modelo;
 	std::string nombre;
-	int salud = 100;
+	int salud = 100, puntuacion = 0;
 	glm::mat4 modelMatrixJugador = glm::mat4(1.0f);
 	int indiceAnimacion = 1;
 	float rotacionY;
 	Bala balas[10];
 	int cantidadBalas = 10;
-	bool activo = true;
+	bool activo = true, disparando = false;
 
 	// Funciones
 	void start(std::string nombre, glm::vec3 posInicial, float rotInicial);
@@ -42,6 +42,6 @@ public:
 
 private:
 	// Variables
-	bool disparando = false, muriendo = false, muerto = false;
+	bool muriendo = false, muerto = false;
 	float tiempoDisparando = 0.0f, tiempoMuriendo = 0.0f;
 };

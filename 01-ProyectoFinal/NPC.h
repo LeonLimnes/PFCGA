@@ -22,9 +22,9 @@ public:
 	std::string nombreAtaque;
 
 	// Funciones
-	void start(std::string nombre, glm::vec3 posInicial, float rotInicial);
+	void start(std::string nombre, glm::vec3 posInicial, float rotInicial, bool activo);
 	void update(Jugador *jugador, Terrain *terreno,
-		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime);
+		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime, bool &activandoNPC, int &idNPC);
 	void cargarModelo(const std::string & path, Shader *shader_ptr);
 	void setShader(Shader *shader_ptr);
 	void crearColisionador(std::map<std::string,
