@@ -47,6 +47,15 @@ void Jugador::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::m
 			activo = false;
 			printf("Fin del juego\n");
 		}
+
+		// El jugador gana la partida
+		if (puntuacion == 2) {
+			tiempoDisparando = 0.0f;
+			disparando = false;
+			activo = false;
+			estadoPrograma = 4;
+			printf("Fin del juego\n");
+		}
 	}
 
 	if (muriendo) {

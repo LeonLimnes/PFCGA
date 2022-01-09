@@ -99,6 +99,7 @@ Box boxLightViewBox;
 
 ShadowBox *shadowBox;
 ImagenUI iconoSalud, iconoEnemigo;
+ImagenUI introduccionUI1, introduccionUI2, introduccionUI3;
 FontTypeRendering::FontTypeRendering *modelText;
 
 // Models complex instances
@@ -132,7 +133,7 @@ bool activandoNPC = false, npcExtrasCargados = false;
 int idNPC = 0;
 
 // Variables para la partida
-int estadoPrograma = 0;
+int estadoPrograma = 0, paginaIntroduccion = 0;
 bool botonApresionado = false;
 
 // Terrain model instance
@@ -307,6 +308,9 @@ bool processInput(bool continueApplication = true);
 void prepareScene();
 void prepareDepthScene();
 void renderScene(bool renderParticles = true);
+void reiniciarPartida();
+void introduccionImagenes(glm::mat4 projection);
+void introduccionTextos();
 
 void initParticleBuffers() {
 	// Generate the buffers
@@ -531,6 +535,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	#pragma region Shader para imagenes UI
 	iconoSalud.shader = shaderUI;
 	iconoEnemigo.shader = shaderUI;
+	introduccionUI1.shader = shaderUI;
+	introduccionUI2.shader = shaderUI;
+	introduccionUI3.shader = shaderUI;
 	#pragma endregion	
 
 	#pragma region Inicializacion otros objetos 3D
@@ -1081,6 +1088,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	#pragma region Inicializacion de imagenes UI
 	iconoSalud.inicializar("../Textures/UI/Salud.png", imageWidth, imageHeight, bitmap, data);
 	iconoEnemigo.inicializar("../Textures/UI/Enemigo.png", imageWidth, imageHeight, bitmap, data);
+	introduccionUI1.inicializar("../Textures/UI/Introduccion1.png", imageWidth, imageHeight, bitmap, data);
+	introduccionUI2.inicializar("../Textures/UI/Introduccion2.png", imageWidth, imageHeight, bitmap, data);
+	introduccionUI3.inicializar("../Textures/UI/Introduccion3.png", imageWidth, imageHeight, bitmap, data);
 	#pragma endregion
 
 	/*******************************************
@@ -1271,6 +1281,9 @@ void destroy() {
 	// Elimina imágenes UI
 	iconoSalud.destroy();
 	iconoEnemigo.destroy();
+	introduccionUI1.destroy();
+	introduccionUI2.destroy();
+	introduccionUI3.destroy();
 
 	// Cube Maps Delete
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -1403,8 +1416,10 @@ bool processInput(bool continueApplication) {
 
 	#pragma region Controles Teclado
 	// Mueve la cámara sin necesidad de presionar los botones
-	camera->mouseMoveCamera(0.5f * offsetX, 0.0, deltaTime);
-	camera->mouseMoveCamera(0.0, 0.5f * offsetY, deltaTime);
+	if (estadoPrograma != 1) {
+		camera->mouseMoveCamera(0.5f * offsetX, 0.0, deltaTime);
+		camera->mouseMoveCamera(0.0, 0.5f * offsetY, deltaTime);
+	}
 	offsetX = 0; offsetY = 0;
 
 	switch (estadoPrograma) {
@@ -1424,7 +1439,23 @@ bool processInput(bool continueApplication) {
 				npcExtrasCargados = true;
 			}
 
-			estadoPrograma = 2;
+			estadoPrograma = 1;
+		}
+		else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE) {
+			botonApresionado = false;
+		}
+		break;
+
+	// Pantalla de introducción
+	case 1:
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && !botonApresionado) {
+			botonApresionado = true;
+			paginaIntroduccion++;
+
+			if (paginaIntroduccion > 6) {
+				paginaIntroduccion = 0;
+				estadoPrograma = 2;
+			}
 		}
 		else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE) {
 			botonApresionado = false;
@@ -1452,28 +1483,15 @@ bool processInput(bool continueApplication) {
 	case 3:
 		// Se vuelve a la pantalla de inicio
 		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-			// Reinicia al jugador
-			jugador.modelMatrixJugador = glm::mat4(1.0);
-			jugador.start("Bart", glm::vec3(13.0f, 0.05f, -9.0f), -90.0f);
-			jugador.muerto = false; jugador.activo = true;
-			jugador.salud = 100; jugador.puntuacion = 0;
+			reiniciarPartida();
+		}
+		break;
 
-			// Reinicia a los NPCs
-			bobAnimate.modelMatrixNPC = glm::mat4(1.0);		bobAnimate.start("NPC-Bob", glm::vec3(0, 0, 20), 0.0f, true);			bobAnimate.salud = 100;
-			mitziAnimate.modelMatrixNPC = glm::mat4(1.0);	mitziAnimate.start("NPC-Mitzi", glm::vec3(13.5, 0, 40), 0.0f, true);	mitziAnimate.salud = 100;
-			rosieAnimate.modelMatrixNPC = glm::mat4(1.0);	rosieAnimate.start("NPC-Rosie", glm::vec3(-8, 0, 10), 0.0f, true);		rosieAnimate.salud = 100;
-			oliviaAnimate.modelMatrixNPC = glm::mat4(1.0);	oliviaAnimate.start("NPC-Olivia", glm::vec3(-25, 0, 20), 0.0f, true);	oliviaAnimate.salud = 100;
-			kikiAnimate.modelMatrixNPC = glm::mat4(1.0);	kikiAnimate.start("NPC-Kiki", glm::vec3(-25, 0, -20), 0.0f, true);		kikiAnimate.salud = 100;
-			tangyAnimate.modelMatrixNPC = glm::mat4(1.0);	tangyAnimate.start("NPC-Tangy", glm::vec3(70, 0, 50), 0.0f, true);		tangyAnimate.salud = 100;
-
-			billyAnimate.modelMatrixNPC = glm::mat4(1.0);	billyAnimate.start("NPC-Billy", glm::vec3(13, 0, 15), 0.0f, false);		billyAnimate.salud = 100;	collidersOBB.erase(billyAnimate.nombre);
-			nanAnimate.modelMatrixNPC = glm::mat4(1.0);		nanAnimate.start("NPC-Nan", glm::vec3(-13, 0, 5), 0.0f, false);			nanAnimate.salud = 100;		collidersOBB.erase(nanAnimate.nombre);
-			chevreAnimate.modelMatrixNPC = glm::mat4(1.0);  chevreAnimate.start("NPC-Chevre", glm::vec3(-70, 0, 0), 0.0f, false);	chevreAnimate.salud = 100;	collidersOBB.erase(chevreAnimate.nombre);
-			gruffAnimate.modelMatrixNPC = glm::mat4(1.0);	gruffAnimate.start("NPC-Gruff", glm::vec3(-50, 0, -35), 0.0f, false);	gruffAnimate.salud = 100;	collidersOBB.erase(gruffAnimate.nombre);
-			velmaAnimate.modelMatrixNPC = glm::mat4(1.0);	velmaAnimate.start("NPC-Velma", glm::vec3(-40, 0, -50), 0.0f, false);	velmaAnimate.salud = 100;	collidersOBB.erase(velmaAnimate.nombre);
-
-			botonApresionado = true;
-			estadoPrograma = 0;
+	// Fin del juego (el jugador gana la partida)
+	case 4:
+		// Se vuelve a la pantalla de inicio
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+			reiniciarPartida();
 		}
 		break;
 
@@ -2068,6 +2086,7 @@ void applicationLoop() {
 		switch (estadoPrograma) {
 		// Pantalla de introducción
 		case 1:
+			introduccionImagenes(projection);
 			break;
 
 		// Partida (gameplay)
@@ -2078,6 +2097,12 @@ void applicationLoop() {
 
 		// Fin del juego (muere el jugador)
 		case 3:
+			iconoSalud.render(glm::vec2(10, 10), glm::vec2(100, 100), 180.0f, glm::vec3(1, 1, 1), projection);
+			iconoEnemigo.render(glm::vec2(600, 10), glm::vec2(100, 100), 180.0f, glm::vec3(1, 1, 1), projection);
+			break;
+
+		// Fin del juego (el jugador gana la partida)
+		case 4:
 			iconoSalud.render(glm::vec2(10, 10), glm::vec2(100, 100), 180.0f, glm::vec3(1, 1, 1), projection);
 			iconoEnemigo.render(glm::vec2(600, 10), glm::vec2(100, 100), 180.0f, glm::vec3(1, 1, 1), projection);
 			break;
@@ -2095,13 +2120,14 @@ void applicationLoop() {
 
 		// Pantalla de inicio
 		case 0:
-			modelText->render("El Bartman en", -0.4, 0.60, 55, 1.0, 1.0, 0.0);
+			modelText->render("Bartman en", -0.35, 0.60, 55, 1.0, 1.0, 0.0);
 			modelText->render("Animal Crossing", -0.5, 0.45, 55, 1.0, 1.0, 0.0);
 			modelText->render("Presione A para comenzar", -0.55, -0.65, 40, 1.0, 1.0, 1.0);
 			break;
 
 		// Pantalla de introducción
 		case 1:
+			introduccionTextos();
 			break;
 
 		// Partida (Gameplay)
@@ -2114,8 +2140,17 @@ void applicationLoop() {
 		case 3:
 			modelText->render(std::to_string(jugador.salud), -0.7, 0.8, 50, 1.0, 1.0, 0.0);				// Salud del jugador
 			modelText->render(std::to_string(11 - jugador.puntuacion), 0.8, 0.8, 50, 1.0, 0.1, 0.0);	// Enemigos restantes
-			modelText->render("El Bartman", -0.35, 0.60, 55, 1.0, 1.0, 0.0);
+			modelText->render("Bartman", -0.25, 0.60, 55, 1.0, 1.0, 0.0);
 			modelText->render("ha muerto", -0.3, 0.45, 55, 1.0, 1.0, 0.0);
+			modelText->render("Presione A para volver al inicio", -0.65, -0.65, 40, 1.0, 1.0, 1.0);
+			break;
+
+		// Fin del juego (el jugador gana la partida)
+		case 4:
+			modelText->render(std::to_string(jugador.salud), -0.7, 0.8, 50, 1.0, 1.0, 0.0);				// Salud del jugador
+			modelText->render(std::to_string(11 - jugador.puntuacion), 0.8, 0.8, 50, 1.0, 0.1, 0.0);	// Enemigos restantes
+			modelText->render("Objetivo cumplido", -0.5, 0.5, 55, 1.0, 1.0, 0.0);
+			modelText->render("Bartman gana", -0.35, 0.35, 55, 1.0, 1.0, 0.0);
 			modelText->render("Presione A para volver al inicio", -0.65, -0.65, 40, 1.0, 1.0, 1.0);
 			break;
 
@@ -2386,20 +2421,11 @@ void renderScene(bool renderParticles){
 	// Cuando un NPC muere, otro tomará su lugar
 	if (activandoNPC == true) {
 		switch (idNPC) {
-		case 0:
-			billyAnimate.activo = true; break;
-
-		case 1:
-			nanAnimate.activo = true; break;
-
-		case 2:
-			chevreAnimate.activo = true; break;
-
-		case 3:
-			gruffAnimate.activo = true; break;
-
-		case 4:
-			velmaAnimate.activo = true; break;
+		case 0: billyAnimate.activo = true; break;
+		case 1: nanAnimate.activo = true; break;
+		case 2: chevreAnimate.activo = true; break;
+		case 3: gruffAnimate.activo = true; break;
+		case 4: velmaAnimate.activo = true; break;
 
 		default:
 			break;
@@ -2599,4 +2625,100 @@ int main(int argc, char **argv) {
 	applicationLoop();
 	destroy();
 	return 1;
+}
+
+void reiniciarPartida() {
+	// Reinicia al jugador
+	jugador.modelMatrixJugador = glm::mat4(1.0);
+	jugador.start("Bart", glm::vec3(13.0f, 0.05f, -9.0f), -90.0f);
+	jugador.muerto = false; jugador.activo = true;
+	jugador.salud = 100; jugador.puntuacion = 0;
+
+	// Reinicia a los NPCs
+	bobAnimate.modelMatrixNPC = glm::mat4(1.0);		bobAnimate.start("NPC-Bob", glm::vec3(0, 0, 20), 0.0f, true);			bobAnimate.salud = 100;
+	mitziAnimate.modelMatrixNPC = glm::mat4(1.0);	mitziAnimate.start("NPC-Mitzi", glm::vec3(13.5, 0, 40), 0.0f, true);	mitziAnimate.salud = 100;
+	rosieAnimate.modelMatrixNPC = glm::mat4(1.0);	rosieAnimate.start("NPC-Rosie", glm::vec3(-8, 0, 10), 0.0f, true);		rosieAnimate.salud = 100;
+	oliviaAnimate.modelMatrixNPC = glm::mat4(1.0);	oliviaAnimate.start("NPC-Olivia", glm::vec3(-25, 0, 20), 0.0f, true);	oliviaAnimate.salud = 100;
+	kikiAnimate.modelMatrixNPC = glm::mat4(1.0);	kikiAnimate.start("NPC-Kiki", glm::vec3(-25, 0, -20), 0.0f, true);		kikiAnimate.salud = 100;
+	tangyAnimate.modelMatrixNPC = glm::mat4(1.0);	tangyAnimate.start("NPC-Tangy", glm::vec3(70, 0, 50), 0.0f, true);		tangyAnimate.salud = 100;
+
+	billyAnimate.modelMatrixNPC = glm::mat4(1.0);	billyAnimate.start("NPC-Billy", glm::vec3(13, 0, 15), 0.0f, false);		billyAnimate.salud = 100;	collidersOBB.erase(billyAnimate.nombre);
+	nanAnimate.modelMatrixNPC = glm::mat4(1.0);		nanAnimate.start("NPC-Nan", glm::vec3(-13, 0, 5), 0.0f, false);			nanAnimate.salud = 100;		collidersOBB.erase(nanAnimate.nombre);
+	chevreAnimate.modelMatrixNPC = glm::mat4(1.0);  chevreAnimate.start("NPC-Chevre", glm::vec3(-70, 0, 0), 0.0f, false);	chevreAnimate.salud = 100;	collidersOBB.erase(chevreAnimate.nombre);
+	gruffAnimate.modelMatrixNPC = glm::mat4(1.0);	gruffAnimate.start("NPC-Gruff", glm::vec3(-50, 0, -35), 0.0f, false);	gruffAnimate.salud = 100;	collidersOBB.erase(gruffAnimate.nombre);
+	velmaAnimate.modelMatrixNPC = glm::mat4(1.0);	velmaAnimate.start("NPC-Velma", glm::vec3(-40, 0, -50), 0.0f, false);	velmaAnimate.salud = 100;	collidersOBB.erase(velmaAnimate.nombre);
+
+	botonApresionado = true;
+	estadoPrograma = 0;
+}
+
+void introduccionImagenes(glm::mat4 projection) {
+	switch (paginaIntroduccion) {
+
+	case 0:
+		introduccionUI1.render(glm::vec2(700, 50), glm::vec2(-600, 350), 180.0f, glm::vec3(1, 1, 1), projection);
+		break;
+
+	case 1:
+		introduccionUI2.render(glm::vec2(700, 50), glm::vec2(-600, 350), 180.0f, glm::vec3(1, 1, 1), projection);
+		break;
+
+	case 2:
+		introduccionUI2.render(glm::vec2(700, 50), glm::vec2(-600, 350), 180.0f, glm::vec3(1, 1, 1), projection);
+		break;
+
+	case 3:
+		introduccionUI3.render(glm::vec2(700, 50), glm::vec2(-600, 350), 180.0f, glm::vec3(1, 1, 1), projection);
+		break;
+
+	default:
+		break;
+	}
+}
+
+void introduccionTextos() {
+	switch (paginaIntroduccion) {
+	case 0:
+		modelText->render("Un dia, Bartman aparecio misteriosamente", -0.85, -0.35, 35, 1.0, 1.0, 1.0);
+		modelText->render("en el pueblo de Animal Crossing.", -0.85, -0.5, 35, 1.0, 1.0, 1.0);
+		modelText->render("Presione A para continuar", -0.45, -0.85, 30, 1.0, 1.0, 1.0);
+		break;
+
+	case 1:
+		modelText->render("Pero Bartman es demasiado travieso y", -0.85, -0.35, 35, 1.0, 1.0, 1.0);
+		modelText->render("esto incomoda a los habitantes del pueblo.", -0.85, -0.5, 35, 1.0, 1.0, 1.0);
+		modelText->render("Presione A para continuar", -0.45, -0.85, 30, 1.0, 1.0, 1.0);
+		break;
+
+	case 2:
+		modelText->render("Tanto que han tenido que tomar medidas", -0.85, -0.35, 35, 1.0, 1.0, 1.0);
+		modelText->render("severas para capturarlo... con redes.", -0.85, -0.5, 35, 1.0, 1.0, 1.0);
+		modelText->render("Presione A para continuar", -0.45, -0.85, 30, 1.0, 1.0, 1.0);
+		break;
+
+	case 3:
+		modelText->render("Sin embargo, Bartman posee un arma", -0.85, -0.35, 35, 1.0, 1.0, 1.0);
+		modelText->render("laser para lidiar con el problema...", -0.85, -0.5, 35, 1.0, 1.0, 1.0);
+		modelText->render("y seguir con sus travesuras.", -0.85, -0.65, 35, 1.0, 1.0, 1.0);
+		modelText->render("Presione A para continuar", -0.45, -0.85, 30, 1.0, 1.0, 1.0);
+		break;
+
+	case 4:
+		modelText->render("Objetivo: eliminar a todos los pueblerinos", -0.9, -0.65, 40, 0.3, 0.9, 0.7);
+		modelText->render("Presione A para continuar", -0.45, -0.85, 30, 1.0, 1.0, 1.0);
+		break;
+
+	case 5:
+		modelText->render("Controles (PC)", -0.35, -0.65, 40, 0.3, 0.9, 0.7);
+		modelText->render("Presione A para continuar", -0.45, -0.85, 30, 1.0, 1.0, 1.0);
+		break;
+
+	case 6:
+		modelText->render("Controles (Mando)", -0.4, -0.65, 40, 0.3, 0.9, 0.7);
+		modelText->render("Presione A para comenzar", -0.45, -0.85, 30, 1.0, 1.0, 1.0);
+		break;
+
+	default:
+		break;
+	}
 }
