@@ -1152,10 +1152,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Config source 0
 	// Generate buffers, or else no sound will happen!
 	alGenBuffers(NUM_BUFFERS, buffer);
-	buffer[0] = alutCreateBufferFromFile("../sounds/fountain.wav");
+	buffer[0] = alutCreateBufferFromFile("../sounds/darth_vader.wav"); //fountain.wav");
 	buffer[1] = alutCreateBufferFromFile("../sounds/fire.wav");
 	buffer[2] = alutCreateBufferFromFile("../sounds/darth_vader.wav");
 	buffer[3] = alutCreateBufferFromFile("../sounds/sonidoCarro.wav");
+	buffer[4] = alutCreateBufferFromFile("../sounds/sonidoCarro.wav");
 	int errorAlut = alutGetError();
 	if (errorAlut != ALUT_ERROR_NO_ERROR){
 		printf("- Error open files with alut %d !!\n", errorAlut);
@@ -1203,6 +1204,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	alSourcei(source[3], AL_BUFFER, buffer[3]);
 	alSourcei(source[3], AL_LOOPING, AL_TRUE);  //AL_FALSE solo repite 1 vez
 	alSourcef(source[3], AL_MAX_DISTANCE, 2000);
+
+	alSourcef(source[4], AL_PITCH, 1.0f);
+	alSourcef(source[4], AL_GAIN, 1.0f);
+	alSourcefv(source[4], AL_POSITION, source3Pos);
+	alSourcefv(source[4], AL_VELOCITY, source3Vel);
+	alSourcei(source[4], AL_BUFFER, buffer[3]);
+	alSourcei(source[4], AL_LOOPING, AL_TRUE);  //AL_FALSE solo repite 1 vez
+	alSourcef(source[4], AL_MAX_DISTANCE, 2000);
 	#pragma endregion
 }
 
