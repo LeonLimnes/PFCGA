@@ -278,7 +278,7 @@ ALenum format;
 ALvoid *data;
 int ch;
 ALboolean loop;
-std::vector<bool> sourcesPlay = {true, true, true, true};
+std::vector<bool> sourcesPlay = {true, true, true, true };
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes);
@@ -1133,10 +1133,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	// Config source 0
 	// Generate buffers, or else no sound will happen!
 	alGenBuffers(NUM_BUFFERS, buffer);
-	buffer[0] = alutCreateBufferFromFile("../sounds/fountain.wav");
-	buffer[1] = alutCreateBufferFromFile("../sounds/fire.wav");
-	buffer[2] = alutCreateBufferFromFile("../sounds/darth_vader.wav");
-	buffer[3] = alutCreateBufferFromFile("../sounds/sonidoCarro.wav");
+	buffer[0] = alutCreateBufferFromFile("../sounds/Fuente de Agua.wav");
+	buffer[1] = alutCreateBufferFromFile("../sounds/Fuego de Chimenea.wav");
+	buffer[2] = alutCreateBufferFromFile("../sounds/Fuego de Chimenea.wav");
+	buffer[3] = alutCreateBufferFromFile("../sounds/Animal Crossing Main Theme.wav");
 	int errorAlut = alutGetError();
 	if (errorAlut != ALUT_ERROR_NO_ERROR){
 		printf("- Error open files with alut %d !!\n", errorAlut);
@@ -1153,37 +1153,39 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	else {
 		printf("init - no errors after alGenSources\n");
 	}
+	// Fuente de Agua
 	alSourcef(source[0], AL_PITCH, 1.0f);
-	alSourcef(source[0], AL_GAIN, 3.0f);
+	alSourcef(source[0], AL_GAIN, 1.5f);
 	alSourcefv(source[0], AL_POSITION, source0Pos);
 	alSourcefv(source[0], AL_VELOCITY, source0Vel);
 	alSourcei(source[0], AL_BUFFER, buffer[0]);
 	alSourcei(source[0], AL_LOOPING, AL_TRUE);
 	alSourcef(source[0], AL_MAX_DISTANCE, 2000);
 
+	// Fuego de Chimenea
 	alSourcef(source[1], AL_PITCH, 1.0f);
-	alSourcef(source[1], AL_GAIN, 3.0f);
+	alSourcef(source[1], AL_GAIN, 2.0f);
 	alSourcefv(source[1], AL_POSITION, source1Pos);
 	alSourcefv(source[1], AL_VELOCITY, source1Vel);
 	alSourcei(source[1], AL_BUFFER, buffer[1]);
 	alSourcei(source[1], AL_LOOPING, AL_TRUE);
 	alSourcef(source[1], AL_MAX_DISTANCE, 2000);
 
+	// Fuego de Chimenea
 	alSourcef(source[2], AL_PITCH, 1.0f);
-	alSourcef(source[2], AL_GAIN, 0.3f);
+	alSourcef(source[2], AL_GAIN, 2.0f);
 	alSourcefv(source[2], AL_POSITION, source2Pos);
 	alSourcefv(source[2], AL_VELOCITY, source2Vel);
 	alSourcei(source[2], AL_BUFFER, buffer[2]);
 	alSourcei(source[2], AL_LOOPING, AL_TRUE);
 	alSourcef(source[2], AL_MAX_DISTANCE, 500);
 
+	// Música
 	alSourcef(source[3], AL_PITCH, 1.0f);
-	alSourcef(source[3], AL_GAIN, 1.0f);
-	alSourcefv(source[3], AL_POSITION, source3Pos);
-	alSourcefv(source[3], AL_VELOCITY, source3Vel);
+	alSourcef(source[3], AL_GAIN, 0.6f);
+	alSourcei(source[3], AL_SOURCE_RELATIVE, AL_TRUE);	// Audio 2D
 	alSourcei(source[3], AL_BUFFER, buffer[3]);
 	alSourcei(source[3], AL_LOOPING, AL_TRUE);  //AL_FALSE solo repite 1 vez
-	alSourcef(source[3], AL_MAX_DISTANCE, 2000);
 	#pragma endregion
 }
 
@@ -2613,7 +2615,6 @@ void renderScene(bool renderParticles){
 			shaderParticlesFire.setInt("Pass", 2);
 			glm::mat4 modelFireParticles = glm::mat4(1.0);
 			modelFireParticles = glm::translate(modelFireParticles, glm::vec3(-4.24, 10.5, 46.87));
-			//modelFireParticles[3][1] = terrain.getHeightTerrain(modelFireParticles[3][0], modelFireParticles[3][2]);
 			shaderParticlesFire.setMatrix4("model", 1, false, glm::value_ptr(modelFireParticles));
 
 			shaderParticlesFire.turnOn();
@@ -2685,13 +2686,13 @@ void renderScene(bool renderParticles){
 			 drawBuf = 1 - drawBuf;
 			 shaderParticlesFire.turnOff();
 
-			 /****************************+
+			 /****************************
 			  * Open AL sound data
 			  */
-			 source1Pos[0] = modelFireParticles2[3].x;
-			 source1Pos[1] = modelFireParticles2[3].y;
-			 source1Pos[2] = modelFireParticles2[3].z;
-			 alSourcefv(source[1], AL_POSITION, source1Pos);
+			 source2Pos[0] = modelFireParticles2[3].x;
+			 source2Pos[1] = modelFireParticles2[3].y;
+			 source2Pos[2] = modelFireParticles2[3].z;
+			 alSourcefv(source[2], AL_POSITION, source2Pos);
 
 			 /**********
 			  * End Render particles systems
