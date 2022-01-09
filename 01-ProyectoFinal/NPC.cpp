@@ -213,7 +213,7 @@ void NPC::colisionAtaque(
 
 			// Si hay trigger del ataque con el jugador, entonces hay daño
 			if (jt->first.compare(jugador->nombre) == 0) {
-				jugador->salud -= 50.0f;
+				jugador->salud -= 10.0f;
 				printf("Vida restante: %d\n", jugador->salud);
 				collidersOBB->erase(nombreAtaque);
 			}
@@ -231,7 +231,7 @@ void NPC::triggerBala(int cantidadBalas,
 
 			// Si una bala impacta al NPC, le hace daño
 			if (jt->first.compare("Bala-" + std::to_string(i)) == 0) {
-				salud -= 15;
+				salud -= 20;
 			}
 		}
 	}

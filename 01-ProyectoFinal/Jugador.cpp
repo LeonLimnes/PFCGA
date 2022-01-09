@@ -49,7 +49,7 @@ void Jugador::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::m
 		}
 
 		// El jugador gana la partida
-		if (puntuacion == 2) {
+		if (puntuacion == 15) {
 			tiempoDisparando = 0.0f;
 			disparando = false;
 			activo = false;
