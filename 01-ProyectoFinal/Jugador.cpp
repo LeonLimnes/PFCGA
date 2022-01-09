@@ -8,16 +8,16 @@ void Jugador::start(std::string nombre, glm::vec3 posInicial, float rotInicial) 
 	modelMatrixJugador = glm::translate(modelMatrixJugador, posInicial);
 	modelMatrixJugador = glm::rotate(modelMatrixJugador, glm::radians(rotInicial), glm::vec3(0, 1, 0));
 	rotacionY = rotInicial;
-
-	// Inicialización de balas
-	for (int i = 0; i < cantidadBalas; i++) {
-		balas[i].inicializar(i);
-	}
 }
 
 void Jugador::cargarModelo(const std::string & path, Shader *shader_ptr) {
 	modelo.loadModel(path);
 	modelo.setShader(shader_ptr);
+
+	// Inicialización de balas
+	for (int i = 0; i < cantidadBalas; i++) {
+		balas[i].inicializar(i, shader_ptr);
+	}
 }
 
 void Jugador::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders,
@@ -49,7 +49,7 @@ void Jugador::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::m
 		}
 
 		// El jugador gana la partida
-		if (puntuacion == 2) {
+		if (puntuacion == 15) {
 			tiempoDisparando = 0.0f;
 			disparando = false;
 			activo = false;
@@ -110,7 +110,7 @@ void Jugador::moverX(std::shared_ptr<Camera> camera, float cantidad) {
 	}
 }
 
-void Jugador::disparar(std::shared_ptr<Camera> camera) {
+void Jugador::disparar(std::shared_ptr<Camera> camera, ALint audioDisparo, ALfloat *posAudioDisparo) {
 
 	if (activo) {
 		// Reutiliza balas disponibles mediente la técnica Object Pooling
@@ -127,6 +127,7 @@ void Jugador::disparar(std::shared_ptr<Camera> camera) {
 
 				// Inicializa la bala dependiendo la posición y orientación del jugador
 				balas[i].modelMatrixBala = glm::mat4(modelMatrixJugador);
+				balas[i].modelMatrixBala = glm::scale(balas[i].modelMatrixBala, glm::vec3(0.4, 0.4, 0.7));
 				balas[i].modelMatrixBala = glm::translate(balas[i].modelMatrixBala, glm::vec3(0, 1.5f, 1.5f));
 				balas[i].modelMatrixBala = glm::rotate(balas[i].modelMatrixBala, camera->getPitch(), glm::vec3(1, 0, 0));
 
@@ -136,6 +137,13 @@ void Jugador::disparar(std::shared_ptr<Camera> camera) {
 				disparando = true;
 			}
 		}
+
+		// Reproduce audio de disparo
+		posAudioDisparo[0] = modelMatrixJugador[3].x;
+		posAudioDisparo[1] = modelMatrixJugador[3].y;
+		posAudioDisparo[2] = modelMatrixJugador[3].z;
+		alSourcefv(audioDisparo, AL_POSITION, posAudioDisparo);
+		alSourcePlay(audioDisparo);
 	}
 }
 
@@ -181,6 +189,10 @@ void Jugador::setShader(Shader *shader_ptr) {
 
 void Jugador::destroy() {
 	modelo.destroy();
+
+	for (int i = 0; i < cantidadBalas; i++) {
+		balas[i].destroy();
+	}
 }
 
 Jugador::Jugador() {}

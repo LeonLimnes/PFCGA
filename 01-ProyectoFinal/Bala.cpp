@@ -3,8 +3,10 @@ extern void addOrUpdateColliders(std::map<std::string,
 	std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders,
 	std::string name, AbstractModel::OBB collider, glm::mat4 transform);
 
-void Bala::inicializar(int indice) {
+void Bala::inicializar(int indice, Shader *shader_ptr) {
 	nombre = "Bala-" + std::to_string(indice);
+	modeloBala.loadModel("../models/Bala/Bala.obj");
+	modeloBala.setShader(shader_ptr);
 }
 
 void Bala::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders,
@@ -16,6 +18,8 @@ void Bala::update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4
 		tiempoVidaActual += deltaTime;
 
 		// Renderizar bala
+		glm::mat4 modelMatrixBalaBody = glm::mat4(modelMatrixBala);
+		modeloBala.render(modelMatrixBalaBody);
 
 		if (tiempoVidaActual >= tiempoMaximoVida) {
 			colliders.erase(nombre);
@@ -51,6 +55,10 @@ void Bala::colisionBala(
 		tiempoVidaActual = 0.0f;
 		activa = false;
 	}
+}
+
+void Bala::destroy() {
+	modeloBala.destroy();
 }
 
 Bala::Bala() { }

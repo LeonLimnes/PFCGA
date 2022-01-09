@@ -2,6 +2,7 @@
 #include "Headers/Model.h"
 #include "Headers/Terrain.h"
 #include "Headers/Camera.h"
+#include <AL/alut.h>
 #include "Bala.h"
 
 class Jugador {
@@ -30,7 +31,7 @@ public:
 	void setShader(Shader *shader_ptr);
 	void moverX(std::shared_ptr<Camera> camera, float cantidad);
 	void moverZ(std::shared_ptr<Camera> camera, float cantidad);
-	void disparar(std::shared_ptr<Camera> camera);
+	void disparar(std::shared_ptr<Camera> camera, ALint audioDisparo, ALfloat *posAudioDisparo);
 	void crearColisionador(std::map<std::string,
 		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders);
 	void colisionesBalas(

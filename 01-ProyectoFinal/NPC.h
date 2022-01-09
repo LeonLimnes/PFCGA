@@ -24,7 +24,8 @@ public:
 	// Funciones
 	void start(std::string nombre, glm::vec3 posInicial, float rotInicial, bool activo);
 	void update(Jugador *jugador, Terrain *terreno,
-		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime, bool &activandoNPC, int &idNPC, int estadoPrograma);
+		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime, 
+		bool &activandoNPC, int &idNPC, int estadoPrograma, ALint audioMuerte, ALfloat *posAudioMuerte);
 	void cargarModelo(const std::string & path, Shader *shader_ptr);
 	void setShader(Shader *shader_ptr);
 	void crearColisionador(std::map<std::string,
@@ -35,12 +36,14 @@ public:
 		Jugador *jugador,
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
-		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt
+		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt,
+		ALint audioGolpe
 	);
 	void triggerBala(int cantidadBalas, 
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
-		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt
+		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt,
+		ALint audioDisparo
 	);
 	void destroy();
 
