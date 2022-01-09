@@ -39,7 +39,8 @@ void NPC::destroy() {
 }
 
 void NPC::update(Jugador *jugador, Terrain *terreno,
-	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime, bool &activandoNPC, int &idNPC, int estadoPrograma) {
+	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime, 
+	bool &activandoNPC, int &idNPC, int estadoPrograma, ALint audioMuerte, ALfloat *posAudioMuerte) {
 
 	if (activo == true) {
 		// El NPC mira hacia la cámara en todo momento
@@ -56,7 +57,7 @@ void NPC::update(Jugador *jugador, Terrain *terreno,
 				distancia = 1.5f;
 				atacando = true;
 			}
-			else if (distancia <= 17.0f && !atacando && !muriendo) {
+			else if (distancia <= 25.0f && !atacando && !muriendo) {
 				a = jdrPos.z - npcPos.z;
 				b = jdrPos.x - npcPos.x;
 				h = sqrt(a*a + b * b);
@@ -68,7 +69,7 @@ void NPC::update(Jugador *jugador, Terrain *terreno,
 				modelMatrixNPC[2] = glm::vec4(0.02 * -sin(-anguloA), 0, 0.02 * sin(anguloB), 0);
 
 				// El NPC corre hacia el jugador
-				modelMatrixNPC = glm::translate(modelMatrixNPC, glm::vec3(0.0f, 0.0f, 2.0f));
+				modelMatrixNPC = glm::translate(modelMatrixNPC, glm::vec3(0.0f, 0.0f, 3.5f));
 				modelo.setAnimationIndex(1);
 			}
 		}
@@ -133,6 +134,14 @@ void NPC::update(Jugador *jugador, Terrain *terreno,
 			tiempoAtacando = 0.0f;
 			modelo.runningTime = 0.0f;
 			colliders.erase(nombre);
+
+			// Reproduce audio de muerte
+			posAudioMuerte[0] = modelMatrixNPC[3].x;
+			posAudioMuerte[1] = modelMatrixNPC[3].y;
+			posAudioMuerte[2] = modelMatrixNPC[3].z;
+			alSourcefv(audioMuerte, AL_POSITION, posAudioMuerte);
+			alSourcePlay(audioMuerte);
+
 			muriendo = true;
 		}
 
@@ -204,7 +213,8 @@ void NPC::colisionAtaque(
 	Jugador *jugador,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
-	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt) {
+	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt,
+	ALint audioGolpe) {
 
 	// Trigger para el ataque
 	if (golpeando) {
@@ -214,7 +224,7 @@ void NPC::colisionAtaque(
 			// Si hay trigger del ataque con el jugador, entonces hay daño
 			if (jt->first.compare(jugador->nombre) == 0) {
 				jugador->salud -= 10.0f;
-				printf("Vida restante: %d\n", jugador->salud);
+				alSourcePlay(audioGolpe);
 				collidersOBB->erase(nombreAtaque);
 			}
 		}
@@ -224,7 +234,8 @@ void NPC::colisionAtaque(
 void NPC::triggerBala(int cantidadBalas,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > *collidersOBB,
 	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
-	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt) {
+	std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt,
+	ALint audioDisparo) {
 
 	if (it->first.compare(nombre.c_str()) == 0) {
 		for (int i = 0; i < cantidadBalas; i++) {
@@ -232,6 +243,7 @@ void NPC::triggerBala(int cantidadBalas,
 			// Si una bala impacta al NPC, le hace daño
 			if (jt->first.compare("Bala-" + std::to_string(i)) == 0) {
 				salud -= 20;
+				alSourcePlay(audioDisparo);
 			}
 		}
 	}

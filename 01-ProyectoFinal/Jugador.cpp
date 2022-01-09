@@ -110,7 +110,7 @@ void Jugador::moverX(std::shared_ptr<Camera> camera, float cantidad) {
 	}
 }
 
-void Jugador::disparar(std::shared_ptr<Camera> camera) {
+void Jugador::disparar(std::shared_ptr<Camera> camera, ALint audioDisparo, ALfloat *posAudioDisparo) {
 
 	if (activo) {
 		// Reutiliza balas disponibles mediente la técnica Object Pooling
@@ -137,6 +137,13 @@ void Jugador::disparar(std::shared_ptr<Camera> camera) {
 				disparando = true;
 			}
 		}
+
+		// Reproduce audio de disparo
+		posAudioDisparo[0] = modelMatrixJugador[3].x;
+		posAudioDisparo[1] = modelMatrixJugador[3].y;
+		posAudioDisparo[2] = modelMatrixJugador[3].z;
+		alSourcefv(audioDisparo, AL_POSITION, posAudioDisparo);
+		alSourcePlay(audioDisparo);
 	}
 }
 

@@ -249,25 +249,23 @@ GLuint depthMap, depthMapFBO;
  **********************/
 
 // OpenAL Defines
-#define NUM_BUFFERS 4
-#define NUM_SOURCES 4
+#define NUM_BUFFERS 8
+#define NUM_SOURCES 8
 #define NUM_ENVIRONMENTS 1
 // Listener
 ALfloat listenerPos[] = { 0.0, 0.0, 4.0 };
 ALfloat listenerVel[] = { 0.0, 0.0, 0.0 };
 ALfloat listenerOri[] = { 0.0, 0.0, 1.0, 0.0, 1.0, 0.0 };
 // Source 0
-ALfloat source0Pos[] = { -2.0, 0.0, 0.0 };
-ALfloat source0Vel[] = { 0.0, 0.0, 0.0 };
+ALfloat source0Pos[] = { -2.0, 0.0, 0.0 };	ALfloat source0Vel[] = { 0.0, 0.0, 0.0 };
 // Source 1
-ALfloat source1Pos[] = { 2.0, 0.0, 0.0 };
-ALfloat source1Vel[] = { 0.0, 0.0, 0.0 };
+ALfloat source1Pos[] = { 2.0, 0.0, 0.0 };	ALfloat source1Vel[] = { 0.0, 0.0, 0.0 };
 // Source 2
-ALfloat source2Pos[] = { 2.0, 0.0, 0.0 };
-ALfloat source2Vel[] = { 0.0, 0.0, 0.0 };
-// Source 3
-ALfloat source3Pos[] = { 2.0, 0.0, 0.0 };
-ALfloat source3Vel[] = { 0.0, 0.0, 0.0 };
+ALfloat source2Pos[] = { 2.0, 0.0, 0.0 };	ALfloat source2Vel[] = { 0.0, 0.0, 0.0 };
+// Source 4
+ALfloat source4Pos[] = { 0.0, 0.0, 1.0 };	ALfloat source4Vel[] = { 0.0, 0.0, 0.0 };
+// Source 6
+ALfloat source6Pos[] = { 0.0, 0.0, 1.0 };	ALfloat source6Vel[] = { 0.0, 0.0, 0.0 };
 // Buffers
 ALuint buffer[NUM_BUFFERS];
 ALuint source[NUM_SOURCES];
@@ -278,7 +276,7 @@ ALenum format;
 ALvoid *data;
 int ch;
 ALboolean loop;
-std::vector<bool> sourcesPlay = {true, true, true, true };
+std::vector<bool> sourcesPlay = {true, true, true, true, false, false, false, false};
 
 // Se definen todos las funciones.
 void reshapeCallback(GLFWwindow *Window, int widthRes, int heightRes);
@@ -1137,6 +1135,10 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	buffer[1] = alutCreateBufferFromFile("../sounds/Fuego de Chimenea.wav");
 	buffer[2] = alutCreateBufferFromFile("../sounds/Fuego de Chimenea.wav");
 	buffer[3] = alutCreateBufferFromFile("../sounds/Animal Crossing Main Theme.wav");
+	buffer[4] = alutCreateBufferFromFile("../sounds/Disparo Laser.wav");
+	buffer[5] = alutCreateBufferFromFile("../sounds/Disparo Acertado.wav");
+	buffer[6] = alutCreateBufferFromFile("../sounds/NPC Muerte.wav");
+	buffer[7] = alutCreateBufferFromFile("../sounds/NPC Golpe.wav");
 	int errorAlut = alutGetError();
 	if (errorAlut != ALUT_ERROR_NO_ERROR){
 		printf("- Error open files with alut %d !!\n", errorAlut);
@@ -1185,7 +1187,39 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	alSourcef(source[3], AL_GAIN, 0.6f);
 	alSourcei(source[3], AL_SOURCE_RELATIVE, AL_TRUE);	// Audio 2D
 	alSourcei(source[3], AL_BUFFER, buffer[3]);
-	alSourcei(source[3], AL_LOOPING, AL_TRUE);  //AL_FALSE solo repite 1 vez
+	alSourcei(source[3], AL_LOOPING, AL_TRUE);
+
+	// Disparo láser
+	alSourcef(source[4], AL_PITCH, 1.0f);
+	alSourcef(source[4], AL_GAIN, 1.0f);
+	alSourcefv(source[4], AL_POSITION, source4Pos);
+	alSourcefv(source[4], AL_VELOCITY, source4Vel);
+	alSourcei(source[4], AL_BUFFER, buffer[4]);
+	alSourcei(source[4], AL_LOOPING, AL_FALSE);		// Se reproduce una sola vez
+	alSourcef(source[4], AL_MAX_DISTANCE, 500);
+
+	// Disparo acertado
+	alSourcef(source[5], AL_PITCH, 1.0f);
+	alSourcef(source[5], AL_GAIN, 0.6f);
+	alSourcei(source[5], AL_SOURCE_RELATIVE, AL_TRUE);	// Audio 2D
+	alSourcei(source[5], AL_BUFFER, buffer[5]);
+	alSourcei(source[5], AL_LOOPING, AL_FALSE);		// Se reproduce una sola vez
+
+	// Muerte NPC
+	alSourcef(source[6], AL_PITCH, 1.0f);
+	alSourcef(source[6], AL_GAIN, 1.0f);
+	alSourcefv(source[6], AL_POSITION, source6Pos);
+	alSourcefv(source[6], AL_VELOCITY, source6Vel);
+	alSourcei(source[6], AL_BUFFER, buffer[6]);
+	alSourcei(source[6], AL_LOOPING, AL_FALSE);		// Se reproduce una sola vez
+	alSourcef(source[6], AL_MAX_DISTANCE, 500);
+
+	// NPC Golpe
+	alSourcef(source[7], AL_PITCH, 1.0f);
+	alSourcef(source[7], AL_GAIN, 0.6f);
+	alSourcei(source[7], AL_SOURCE_RELATIVE, AL_TRUE);	// Audio 2D
+	alSourcei(source[7], AL_BUFFER, buffer[7]);
+	alSourcei(source[7], AL_LOOPING, AL_FALSE);		// Se reproduce una sola vez
 	#pragma endregion
 }
 
@@ -1342,7 +1376,7 @@ void mouseButtonCallback(GLFWwindow *window, int button, int state, int mod) {
 
 		case GLFW_MOUSE_BUTTON_LEFT:
 			if (!jugador.disparando && estadoPrograma == 2) {
-				jugador.disparar(camera);
+				jugador.disparar(camera, source[4], source4Pos);
 			}
 			break;
 
@@ -1449,7 +1483,7 @@ bool processInput(bool continueApplication) {
 
 			// Disparar (Gatillo derecho)
 			if (axes[5] > 0.4f && !jugador.disparando) {
-				jugador.disparar(camera);
+				jugador.disparar(camera, source[4], source4Pos);
 			}
 			break;
 
@@ -2024,23 +2058,23 @@ void applicationLoop() {
 					isCollision = true;
 
 					// Colisiones para los NPCs
-					bobAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);		bobAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					mitziAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	mitziAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					rosieAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	rosieAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					oliviaAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	oliviaAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					kikiAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	kikiAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					tangyAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	tangyAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					bobAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);		bobAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					mitziAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	mitziAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					rosieAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	rosieAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					oliviaAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	oliviaAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					kikiAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);		kikiAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					tangyAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	tangyAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
 					
-					billyAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	billyAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					nanAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);		nanAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					chevreAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	chevreAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					gruffAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	gruffAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					velmaAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	velmaAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					billyAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	billyAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					nanAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);		nanAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					chevreAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	chevreAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					gruffAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	gruffAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					velmaAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	velmaAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
 
-					budAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);		budAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					octavianAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt); octavianAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					chiefAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);	chiefAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
-					cjAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt);		cjAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt);
+					budAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);		budAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					octavianAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]); octavianAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					chiefAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);	chiefAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
+					cjAnimate.colisionAtaque(&jugador, &collidersOBB, it, jt, source[7]);		cjAnimate.triggerBala(jugador.cantidadBalas, &collidersOBB, it, jt, source[5]);
 
 					// Colisiones para las balas del jugador
 					jugador.colisionesBalas(&collidersOBB, it, jt);
@@ -2207,7 +2241,7 @@ void applicationLoop() {
 			modelText->render(std::to_string(jugador.salud), -0.7, 0.8, 50, 1.0, 1.0, 0.0);				// Salud del jugador
 			modelText->render(std::to_string(15 - jugador.puntuacion), 0.8, 0.8, 50, 1.0, 0.1, 0.0);	// Enemigos restantes
 			modelText->render("Bartman", -0.25, 0.60, 55, 1.0, 1.0, 0.0);
-			modelText->render("ha muerto", -0.3, 0.45, 55, 1.0, 1.0, 0.0);
+			modelText->render("fue capturado", -0.40, 0.45, 55, 1.0, 1.0, 0.0);
 			modelText->render("Presione A para volver al inicio", -0.65, -0.65, 40, 1.0, 1.0, 1.0);
 			break;
 
@@ -2476,25 +2510,25 @@ void renderScene(bool renderParticles){
 
 	#pragma region Renderizado de NPCs
 	// Gatos
-	bobAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	rosieAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	oliviaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	kikiAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
+	bobAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	mitziAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	rosieAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	oliviaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	kikiAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	tangyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
 
 	// Cabras
-	billyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	nanAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	chevreAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	gruffAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	velmaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
+	billyAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	nanAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	chevreAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	gruffAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	velmaAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
 
 	// Adicionales
-	budAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	octavianAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	chiefAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
-	cjAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma);
+	budAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	octavianAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	chiefAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
+	cjAnimate.update(&jugador, &terrain, collidersOBB, deltaTime, activandoNPC, idNPC, estadoPrograma, source[6], source6Pos);
 
 	// Cuando un NPC muere, otro tomará su lugar
 	if (activandoNPC == true) {
