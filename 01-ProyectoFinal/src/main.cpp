@@ -1632,7 +1632,7 @@ void applicationLoop() {
 	budAnimate.start("NPC-Bud", glm::vec3(80, 0, -30), 0.0f, false);
 	octavianAnimate.start("NPC-Octavian", glm::vec3(50, 0, 70), 120.0f, false);
 	chiefAnimate.start("NPC-Chief", glm::vec3(-80, 0, 10), 95.0f, false);
-	cjAnimate.start("NPC-CJ", glm::vec3(-90, 0, 35), 180.0f, false);
+	cjAnimate.start("NPC-CJ", glm::vec3(-85, 0, 35), 180.0f, false);
 	#pragma endregion
 
 	lastTime = TimeManager::Instance().GetTime();
@@ -2008,32 +2008,6 @@ void applicationLoop() {
 		#pragma region Colisionador Jugador
 		// Collider del jugador
 		jugador.crearColisionador(collidersOBB);
-		#pragma endregion
-
-		/*******************************************
-		 * Render de colliders
-		 *******************************************/
-		#pragma region Renderizado de colisionadores
-		// OBB
-		for (std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it = collidersOBB.begin(); it != collidersOBB.end(); it++) {
-			glm::mat4 matrixCollider = glm::mat4(1.0);
-			matrixCollider = glm::translate(matrixCollider, std::get<0>(it->second).c);
-			matrixCollider = matrixCollider * glm::mat4(std::get<0>(it->second).u);
-			matrixCollider = glm::scale(matrixCollider, std::get<0>(it->second).e * 2.0f);
-			boxCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-			boxCollider.enableWireMode();
-			boxCollider.render(matrixCollider);
-		}
-
-		// SBB
-		for (std::map<std::string, std::tuple<AbstractModel::SBB, glm::mat4, glm::mat4> >::iterator it = collidersSBB.begin(); it != collidersSBB.end(); it++) {
-			glm::mat4 matrixCollider = glm::mat4(1.0);
-			matrixCollider = glm::translate(matrixCollider, std::get<0>(it->second).c);
-			matrixCollider = glm::scale(matrixCollider, glm::vec3(std::get<0>(it->second).ratio * 2.0f));
-			sphereCollider.setColor(glm::vec4(1.0, 1.0, 1.0, 1.0));
-			sphereCollider.enableWireMode();
-			sphereCollider.render(matrixCollider);
-		}
 		#pragma endregion
 
 		/*******************************************
@@ -2758,7 +2732,7 @@ void reiniciarPartida() {
 	budAnimate.modelMatrixNPC = glm::mat4(1.0);		budAnimate.start("NPC-Bud", glm::vec3(80, 0, -30), 0.0f, false);		budAnimate.salud = 100;		collidersOBB.erase(budAnimate.nombre);
 	octavianAnimate.modelMatrixNPC = glm::mat4(1.0); octavianAnimate.start("NPC-Octavian", glm::vec3(50, 0, 70), 120.0f, false);	octavianAnimate.salud = 100; collidersOBB.erase(octavianAnimate.nombre);
 	chiefAnimate.modelMatrixNPC = glm::mat4(1.0);	chiefAnimate.start("NPC-Chief", glm::vec3(-80, 0, 10), 95.0f, false);	chiefAnimate.salud = 100;	collidersOBB.erase(chiefAnimate.nombre);
-	cjAnimate.modelMatrixNPC = glm::mat4(1.0);		cjAnimate.start("NPC-CJ", glm::vec3(-90, 0, 35), 180.0f, false);		cjAnimate.salud = 100;		collidersOBB.erase(cjAnimate.nombre);
+	cjAnimate.modelMatrixNPC = glm::mat4(1.0);		cjAnimate.start("NPC-CJ", glm::vec3(-85, 0, 35), 180.0f, false);		cjAnimate.salud = 100;		collidersOBB.erase(cjAnimate.nombre);
 
 	botonApresionado = true;
 	estadoPrograma = 0;

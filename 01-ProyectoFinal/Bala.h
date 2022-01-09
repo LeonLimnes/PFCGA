@@ -9,13 +9,13 @@ public:
 
 	// Variables
 	std::string nombre;
-	Model modelo;
+	Model modelo, modeloBala;
 	glm::mat4 modelMatrixBala = glm::mat4(1.0f);
 	bool activa = false;
 	float velocidadDisparo = 1.5f, tiempoMaximoVida = 5.0f, tiempoVidaActual = 0.0f;
 
 	// Funciones
-	void inicializar(int indice);
+	void inicializar(int indice, Shader *shader_ptr);
 	void update(std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders, float deltaTime);
 	void crearColisionador(std::map<std::string,
 		std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> > &colliders);
@@ -24,4 +24,5 @@ public:
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator it,
 		std::map<std::string, std::tuple<AbstractModel::OBB, glm::mat4, glm::mat4> >::iterator jt
 	);
+	void destroy();
 };
