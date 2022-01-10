@@ -96,6 +96,8 @@ Model modelAircraft;
 //Casas
 Model modelCasa, modelCasa2, modelCasa3, modelCasa4, modelCasa5, modelCasa6;
 
+//Cerca
+Model modelCerca;
 // Lamps
 Model modelLamp1;
 Model modelLamp2;
@@ -160,6 +162,12 @@ glm::mat4 modelMatrixCasa6 = glm::mat4(1.0);
 
 glm::mat4 modelMatrixFountain = glm::mat4(1.0f);	// Fuente de agua
 glm::mat4 modelMatrixHazmat = glm::mat4(1.0f);		// hazmat
+
+//Cerca
+glm::mat4 modelMatrixCerca = glm::mat4(1.0f);
+glm::mat4 modelMatrixCerca2 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCerca3 = glm::mat4(1.0f);
+glm::mat4 modelMatrixCerca4 = glm::mat4(1.0f);
 
 // Lamps positions
 std::vector<glm::vec3> lamp1Position = { glm::vec3(-53.51, 0, -20.70), glm::vec3(-22.26, 0, -2.73), 
@@ -568,6 +576,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	modelCasa6.loadModel("../models/CelesticTownHouse/CelesticTownHouse.obj");
 	modelCasa6.setShader(&shaderMulLighting);
+
+	modelCerca.loadModel("../models/Fence/Fence.obj");
+	modelCerca.setShader(&shaderMulLighting);
 	#pragma endregion
 
 	terrain.init();
@@ -1257,6 +1268,8 @@ void destroy() {
 	modelCasa4.destroy();
 	modelCasa5.destroy();
 	modelCasa6.destroy();
+	//Cerca
+	modelCerca.destroy();
 
 	modelLamp1.destroy();
 	modelLamp2.destroy();
@@ -1639,6 +1652,20 @@ void applicationLoop() {
 	modelMatrixCasa6 = glm::translate(modelMatrixCasa6, glm::vec3(-60.93, 0.0, -38.28));
 	modelMatrixCasa6 = glm::scale(modelMatrixCasa6, glm::vec3(0.1f, 0.1f, 0.1f));
 
+	glm::mat4 tempCerca = modelMatrixCerca;
+	tempCerca = glm::scale(modelMatrixCerca, glm::vec3(2.5f, 1.0f, 1.0f));
+	modelMatrixCerca = glm::translate(tempCerca, glm::vec3(0.0, 0.0, -75.0));
+
+	modelMatrixCerca2 = glm::translate(tempCerca, glm::vec3(0.0, 0.0, 70.0));
+	
+	modelMatrixCerca3 = glm::translate(tempCerca, glm::vec3(34.0, 0.0, 1.0));
+	modelMatrixCerca3 = glm::rotate(modelMatrixCerca3, glm::radians(90.0f), glm::vec3(0.0f,1.0f,0.0f));
+	modelMatrixCerca3 = glm::scale(modelMatrixCerca3, glm::vec3(2.0f, 1.0f, 1.0f));
+
+	modelMatrixCerca4 = glm::translate(tempCerca, glm::vec3(-34.0, 0.0, 1.0));
+	modelMatrixCerca4 = glm::rotate(modelMatrixCerca4, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	modelMatrixCerca4 = glm::scale(modelMatrixCerca4, glm::vec3(2.0f, 1.0f, 1.0f));
+
 	// Fuente de agua
 	modelMatrixFountain = glm::translate(modelMatrixFountain, glm::vec3(-0.6, 0.0, -4.5));
 	modelMatrixFountain[3][1] = terrain.getHeightTerrain(modelMatrixFountain[3][0] , modelMatrixFountain[3][2]); //+ 0.2
@@ -1963,6 +1990,47 @@ void applicationLoop() {
 		casaCollider2.c = glm::vec3(modelMatrixColliderCasa2[3]);
 		casaCollider2.e = modelCasa2.getObb().e * glm::vec3(0.085, 0.1, 0.085);
 		addOrUpdateColliders(collidersOBB, "casa2", casaCollider2, modelMatrixCasa2);
+
+		glm::mat4 modelMatrixColliderCerca = glm::mat4(modelMatrixCerca);
+		AbstractModel::OBB cercaCollider;
+		// Set the orientation of collider before doing the scale
+		cercaCollider.u = glm::quat_cast(modelMatrixCerca);
+		modelMatrixColliderCerca = glm::scale(modelMatrixColliderCerca, glm::vec3(2.4, 1.0, 1.0));
+		modelMatrixColliderCerca = glm::translate(modelMatrixColliderCerca, modelCerca.getObb().c);
+		cercaCollider.c = glm::vec3(modelMatrixColliderCerca[3]);
+		cercaCollider.e = modelCerca.getObb().e * glm::vec3(2.4, 1.0, 1.0);
+		addOrUpdateColliders(collidersOBB, "cerca", cercaCollider, modelMatrixCerca);
+
+		glm::mat4 modelMatrixColliderCerca2 = glm::mat4(modelMatrixCerca2);
+		AbstractModel::OBB cerca2Collider;
+		// Set the orientation of collider before doing the scale
+		cerca2Collider.u = glm::quat_cast(modelMatrixCerca2);
+		modelMatrixColliderCerca2 = glm::scale(modelMatrixColliderCerca2, glm::vec3(2.4, 1.0, 1.0));
+		modelMatrixColliderCerca2 = glm::translate(modelMatrixColliderCerca2, modelCerca.getObb().c);
+		cerca2Collider.c = glm::vec3(modelMatrixColliderCerca2[3]);
+		cerca2Collider.e = modelCerca.getObb().e * glm::vec3(2.4, 1.0, 1.0);
+		addOrUpdateColliders(collidersOBB, "cerca2", cerca2Collider, modelMatrixCerca2);
+		
+		glm::mat4 modelMatrixColliderCerca3 = glm::mat4(modelMatrixCerca3);
+		AbstractModel::OBB cerca3Collider;
+		// Set the orientation of collider before doing the scale
+		cerca3Collider.u = glm::quat_cast(modelMatrixCerca3);
+		modelMatrixColliderCerca3 = glm::scale(modelMatrixColliderCerca3, glm::vec3(5.0, 1.0, 1.0));
+		modelMatrixColliderCerca3 = glm::translate(modelMatrixColliderCerca3, modelCerca.getObb().c);
+		cerca3Collider.c = glm::vec3(modelMatrixColliderCerca3[3]);
+		cerca3Collider.e = modelCerca.getObb().e * glm::vec3(5.0, 1.0, 1.0);
+		addOrUpdateColliders(collidersOBB, "cerca3", cerca3Collider, modelMatrixCerca3);
+
+		glm::mat4 modelMatrixColliderCerca4 = glm::mat4(modelMatrixCerca4);
+		AbstractModel::OBB cerca4Collider;
+		// Set the orientation of collider before doing the scale
+		cerca4Collider.u = glm::quat_cast(modelMatrixCerca4);
+		modelMatrixColliderCerca4 = glm::scale(modelMatrixColliderCerca4, glm::vec3(5.0, 1.0, 1.0));
+		modelMatrixColliderCerca4 = glm::translate(modelMatrixColliderCerca4, modelCerca.getObb().c);
+		cerca4Collider.c = glm::vec3(modelMatrixColliderCerca4[3]);
+		cerca4Collider.e = modelCerca.getObb().e * glm::vec3(5.0, 1.0, 1.0);
+		addOrUpdateColliders(collidersOBB, "cerca4", cerca4Collider, modelMatrixCerca4);
+
 
 		glm::mat4 modelMatrixColliderCasa3 = glm::mat4(modelMatrixCasa3);
 		AbstractModel::OBB casaCollider3;
@@ -2312,6 +2380,9 @@ void prepareScene(){
 	modelCasa5.setShader(&shaderMulLighting);
 	modelCasa6.setShader(&shaderMulLighting);
 
+	//cerca
+	modelCerca.setShader(&shaderMulLighting);
+
 	terrain.setShader(&shaderTerrain);
 
 	// Lamp models
@@ -2359,6 +2430,9 @@ void prepareDepthScene(){
 	modelCasa4.setShader(&shaderDepth);
 	modelCasa5.setShader(&shaderDepth);
 	modelCasa6.setShader(&shaderDepth);
+
+
+	modelCerca.setShader(&shaderDepth);
 
 	terrain.setShader(&shaderDepth);
 
@@ -2458,6 +2532,18 @@ void renderScene(bool renderParticles){
 
 	modelMatrixCasa6[3][1] = terrain.getHeightTerrain(modelMatrixCasa6[3][0], modelMatrixCasa6[3][2]);
 	modelCasa6.render(modelMatrixCasa6);
+
+	modelMatrixCerca[3][1] = terrain.getHeightTerrain(modelMatrixCerca[3][0], modelMatrixCerca[3][2]);
+	modelCerca.render(modelMatrixCerca);
+
+	modelMatrixCerca2[3][1] = terrain.getHeightTerrain(modelMatrixCerca2[3][0], modelMatrixCerca2[3][2]);
+	modelCerca.render(modelMatrixCerca2);
+
+	modelMatrixCerca3[3][1] = terrain.getHeightTerrain(modelMatrixCerca3[3][0], modelMatrixCerca3[3][2]);
+	modelCerca.render(modelMatrixCerca3);
+
+	modelMatrixCerca4[3][1] = terrain.getHeightTerrain(modelMatrixCerca4[3][0], modelMatrixCerca4[3][2]);
+	modelCerca.render(modelMatrixCerca4);
 	#pragma endregion
 
 	#pragma region Renderizado postes de luz
@@ -2565,6 +2651,8 @@ void renderScene(bool renderParticles){
 	blendingUnsorted.find("casa4")->second = glm::vec3(modelMatrixCasa4[3]);
 	blendingUnsorted.find("casa5")->second = glm::vec3(modelMatrixCasa5[3]);
 	blendingUnsorted.find("casa6")->second = glm::vec3(modelMatrixCasa6[3]);
+
+	blendingUnsorted.find("cerca")->second = glm::vec3(modelMatrixCerca[3]);
 
 	/**********
 	 * Sorter with alpha objects
