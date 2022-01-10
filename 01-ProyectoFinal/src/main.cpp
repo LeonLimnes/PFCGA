@@ -1693,9 +1693,9 @@ void applicationLoop() {
 	velmaAnimate.start("NPC-Velma", glm::vec3(-40, 0, -50), 0.0f, false);
 
 	budAnimate.start("NPC-Bud", glm::vec3(80, 0, -30), 0.0f, false);
-	octavianAnimate.start("NPC-Octavian", glm::vec3(50, 0, 70), 120.0f, false);
+	octavianAnimate.start("NPC-Octavian", glm::vec3(50, 0, 65), 120.0f, false);
 	chiefAnimate.start("NPC-Chief", glm::vec3(-80, 0, 10), 95.0f, false);
-	cjAnimate.start("NPC-CJ", glm::vec3(-85, 0, 35), 180.0f, false);
+	cjAnimate.start("NPC-CJ", glm::vec3(-80, 0, 35), 180.0f, false);
 	#pragma endregion
 
 	lastTime = TimeManager::Instance().GetTime();
@@ -2853,9 +2853,9 @@ void reiniciarPartida() {
 	velmaAnimate.modelMatrixNPC = glm::mat4(1.0);	velmaAnimate.start("NPC-Velma", glm::vec3(-40, 0, -50), 0.0f, false);	velmaAnimate.salud = 100;	collidersOBB.erase(velmaAnimate.nombre);
 
 	budAnimate.modelMatrixNPC = glm::mat4(1.0);		budAnimate.start("NPC-Bud", glm::vec3(80, 0, -30), 0.0f, false);		budAnimate.salud = 100;		collidersOBB.erase(budAnimate.nombre);
-	octavianAnimate.modelMatrixNPC = glm::mat4(1.0); octavianAnimate.start("NPC-Octavian", glm::vec3(50, 0, 70), 120.0f, false);	octavianAnimate.salud = 100; collidersOBB.erase(octavianAnimate.nombre);
+	octavianAnimate.modelMatrixNPC = glm::mat4(1.0); octavianAnimate.start("NPC-Octavian", glm::vec3(50, 0, 65), 120.0f, false);	octavianAnimate.salud = 100; collidersOBB.erase(octavianAnimate.nombre);
 	chiefAnimate.modelMatrixNPC = glm::mat4(1.0);	chiefAnimate.start("NPC-Chief", glm::vec3(-80, 0, 10), 95.0f, false);	chiefAnimate.salud = 100;	collidersOBB.erase(chiefAnimate.nombre);
-	cjAnimate.modelMatrixNPC = glm::mat4(1.0);		cjAnimate.start("NPC-CJ", glm::vec3(-85, 0, 35), 180.0f, false);		cjAnimate.salud = 100;		collidersOBB.erase(cjAnimate.nombre);
+	cjAnimate.modelMatrixNPC = glm::mat4(1.0);		cjAnimate.start("NPC-CJ", glm::vec3(-80, 0, 35), 180.0f, false);		cjAnimate.salud = 100;		collidersOBB.erase(cjAnimate.nombre);
 
 	botonApresionado = true;
 	estadoPrograma = 0;
